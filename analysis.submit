@@ -1,0 +1,15 @@
+Universe = vanilla
+
+Executable = runAnalysis.sh
+Arguments = $(channel)
+
+should_transfer_files = YES
+transfer_input_files = sandbox-CMSSW_9_4_9-b766bc0.tar.bz2, cmssw_setup.sh
+
+Error = log/181108/job_$(Cluster)-$(Process).err
+Output = log/181108/job_$(Cluster)-$(Process).out
+Log = log/181108/job_$(Cluster).log
+
+#Queue channel from filelist_skim.txt 
+#Queue channel from rerun.txt 
+Queue channel from filelist_lepton_skim.txt
