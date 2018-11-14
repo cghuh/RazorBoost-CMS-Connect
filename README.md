@@ -15,9 +15,6 @@ This is CMS connect scripts for 2017's CMS razor boost analysis. It is not fully
 # Rerun
 	* When you finished to run the script, some are failed. In this situation, you can re-run using MakeRerunList.sh
 	* You have to put the log directory location in MakeRerunList.sh(#3)
-	* and do 
-	```Shell
-	source MakeRerunList.sh
-	```
+	* source MakeRerunList.sh
 	* You can get a rerun.txt
-	* fix the analysis.submit #13-15
+	* fix the analysis.submit(#13-15); you have to use "Queue channel from rerun.txt"
