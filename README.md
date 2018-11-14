@@ -7,15 +7,17 @@ This is CMS connect scripts for 2017's CMS razor boost analysis. It is not fully
 	* condor_submit analysis.submit
 
 ## Before you do run
-	* If you need, you can use private filelist and need to fix in analysis_submit #15
-	* you have to make directory under log/ . It must be same name in analysis_submit #9-11
-	* You have to fix directory_name in runAnalysis.sh #37 . It should be exist in your cluster(ex. eos)
-	* #76-85 You should fix that directory that your storage. It need to fix 1 times.
-
+	* If you need, you can use private filelist and need to fix in analysis_submit(#15)
+	* you have to make directory under log/ . It must be same name in analysis_submit(#9-11)
+	* You have to fix directory_name in runAnalysis.sh(#37) . It should be exist in your cluster(ex. eos)
+	* runAnalysis.sh(#76-85) You should fix that directory same as in your storage.
+	
 # Rerun
-
-	* When you finished to run the script, some are failed. In that situation, you can check using MakeRerunList.sh
-	* You have to put the log directory location in #3
-	* and do source MakeRerunList.sh
+	* When you finished to run the script, some are failed. In this situation, you can re-run using MakeRerunList.sh
+	* You have to put the log directory location in MakeRerunList.sh(#3)
+	* and do 
+	```shell
+	source MakeRerunList.sh
+	```
 	* You can get a rerun.txt
 	* fix the analysis.submit #13-15
