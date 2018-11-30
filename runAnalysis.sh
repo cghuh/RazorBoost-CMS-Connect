@@ -34,14 +34,17 @@ export CMSSW_BASE=CMSSW_9_4_9/
 # Name my input channel
 channel_rootpath="$1"
 channel_name="$(basename $channel_rootpath)"
-directory_name="181025"
-#directory_name="skim"
+directory_name="test"
 
 # Enter script directory
 cd $CMSSW_BASE/src/BoostAnalyzer17/
 eval `scramv1 runtime -sh`
 source setup.sh
 
+#Download ROOTLogon to define plotting styles and load some libraries
+#wget --no-check-certificate --progress=bar "http://stash.osgconnect.net/+khurtado/rootlogon.C" || exit_on_error $? 150 "Could not download rootlogon."
+
+#make -Bj;
 if [[ "$channel_rootpath" == *"JetHT"* ]];then
         list_name="filelists/data/JetHT.txt"
 elif [[ "$channel_rootpath" == *"SingleMuon"* ]];then
@@ -58,7 +61,7 @@ fi
 
 echo $channel_rootpath > ${list_name}
 
-filename=$(cut -d'/' -f15 filelists/*/*.txt)
+filename=$(cut -d'/' -f12 filelists/*/*.txt)
 
 #echo $channel_rootpath > filelists/data/run.txt
 
@@ -70,20 +73,9 @@ mydate=$(date +%Y_%m_%d)
 echo "Output file size: "
 du -hs "run.root"
 
-# Stage-out to FNAL EOS
 #mydate=$(date +%Y_%m_%d_%k_%M)
-#if [ ${channel_rootpath:51:5} == "JetHT" ]; then
-if [[ "$channel_rootpath" == *"JetHT"* ]];then
-	xrdcp -f "run.root" "root://cluster142.knu.ac.kr//store/user/chuh/RazorBoost/${directory_name}/data/${filename}_${channel_name}" 2>&1 || exit_on_error $? 153 "Failed to transfer the file ${channel_rootpath}"
-elif [[ "$channel_rootpath" == *"SingleElectron"* ]];then
-	xrdcp -f "run.root" "root://cluster142.knu.ac.kr//store/user/chuh/RazorBoost/${directory_name}/data/${filename}_${channel_name}" 2>&1 || exit_on_error $? 153 "Failed to transfer the file ${channel_rootpath}"
-elif [[ "$channel_rootpath" == *"SingleMuon"* ]];then
-	xrdcp -f "run.root" "root://cluster142.knu.ac.kr//store/user/chuh/RazorBoost/${directory_name}/data/${filename}_${channel_name}" 2>&1 || exit_on_error $? 153 "Failed to transfer the file ${channel_rootpath}"
-elif [[ "$channel_rootpath" == *"MET"* ]];then
-	xrdcp -f "run.root" "root://cluster142.knu.ac.kr//store/user/chuh/RazorBoost/${directory_name}/data/${filename}_${channel_name}" 2>&1 || exit_on_error $? 153 "Failed to transfer the file ${channel_rootpath}"
-else
-	xrdcp -f "run.root" "root://cluster142.knu.ac.kr//store/user/chuh/RazorBoost/${directory_name}/background/${filename}_${channel_name}" 2>&1 || exit_on_error $? 153 "Failed to transfer the file ${channel_rootpath}"
-fi
+#if [[ "$channel_rootpath" == *"JetHT"* ]];then
+	xrdcp -f "run.root" "root://eoscms.cern.ch//eos/cms/store/user/chuh/RazorBoost/${directory_name}/${filename}/${channel_name}" 2>&1 || exit_on_error $? 153 "Failed to transfer the file ${channel_rootpath}"
 #xrdcp -f "$channel_name.root" "root://cmseos.fnal.gov:1094//eos/uscms/store/user/kenai/xrootd_test/${channel_name}_${mydate}.root" 2>&1
 
 # Clean up

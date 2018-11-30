@@ -10,6 +10,5 @@ Error = log/181108/job_$(Cluster)-$(Process).err
 Output = log/181108/job_$(Cluster)-$(Process).out
 Log = log/181108/job_$(Cluster).log
 
-#Queue channel from filelist_skim.txt 
+Queue channel from filelist.txt 
 #Queue channel from rerun.txt 
-Queue channel from filelist_lepton_skim.txt
