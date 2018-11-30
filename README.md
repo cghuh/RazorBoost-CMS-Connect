@@ -1,5 +1,5 @@
 # RazorBoost-CMS-Connect
-CMS-connect scripts for Razor Boost analysis 2017/2018. It should be more develope.
+CMS-connect scripts for Razor Boost analysis 2017/2018. It should be more develope. Filelist.txt is skimming file location.
 
 ## Recipe
 
