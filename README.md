@@ -16,6 +16,7 @@ condor_submit analysis.submit
     Fix the "analysis.submit" file, #9-12. This is log file location. You have to made this folder. If you don't the run's are not running.
     Fix the "runAnalysis.sh" file, #37 : This is specific directory that you stored the results. 
     Fix the "runAnalysis.sh" file, #78 : This is site and storage address. You have to fix that you can use.
+    ******* Never put some txt files in the filelists/backgrounds or filelists/data in BoostAnalyzer17 **********
    
 ### do running
     condor_submit analysis.submit
