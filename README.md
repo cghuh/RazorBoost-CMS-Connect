@@ -1,5 +1,8 @@
 # RazorBoost-CMS-Connect
 CMS-connect scripts for Razor Boost analysis 2017/2018. It should be more develope. filelist.txt is skimming file location.
+Useful link for the handbook of CMS connect
+https://ci-connect.atlassian.net/wiki/spaces/CMS/pages/6783080/CMS+Connect+Quickstart
+
 
 ## Recipe
 
