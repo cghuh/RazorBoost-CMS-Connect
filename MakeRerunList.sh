@@ -24,3 +24,4 @@ do
     fi
   done < $i
 done
+rm -f $FileList
