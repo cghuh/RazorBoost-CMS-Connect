@@ -34,7 +34,12 @@ export CMSSW_BASE=CMSSW_9_4_9/
 # Name my input channel
 channel_rootpath="$1"
 channel_name="$(basename $channel_rootpath)"
-directory_name="test"
+#directory_name="190121"
+#directory_name="190121_PFHT1050"
+#directory_name="190121_AK8PFHT800_TrimMass50"
+#directory_name="190121_PFHT500_PFMET100_PFMHT100_IDTight"
+#directory_name="190121_PFHT1050_AK8PFHT800_TrimMass50"
+directory_name="190318_PFHT1050_PFHT500_PFMET100_PFMHT100_IDTight"
 
 # Enter script directory
 cd $CMSSW_BASE/src/BoostAnalyzer17/
@@ -55,13 +60,16 @@ elif [[ "$channel_rootpath" == *"MET"* ]];then
         list_name="filelists/data/MET.txt"
 elif [[ "$channel_rootpath" == *"SinglePhoton"* ]];then
         list_name="filelists/data/SinglePhoton.txt"
+elif [[ "$channel_rootpath" == *"SMS"* ]];then
+        list_name="filelists/signals/run.txt"
 else
         list_name="filelists/backgrounds/run.txt"
 fi
 
 echo $channel_rootpath > ${list_name}
 
-filename=$(cut -d'/' -f12 filelists/*/*.txt)
+#filename=$(cut -d'/' -f8 filelists/*/*.txt) # This is for unskimmed ntuples
+filename=$(cut -d'/' -f12 filelists/*/*.txt) # This is for skimmed ntuples
 
 #echo $channel_rootpath > filelists/data/run.txt
 
