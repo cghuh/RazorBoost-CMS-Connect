@@ -34,12 +34,13 @@ export CMSSW_BASE=CMSSW_9_4_9/
 # Name my input channel
 channel_rootpath="$1"
 channel_name="$(basename $channel_rootpath)"
-#directory_name="190121"
-#directory_name="190121_PFHT1050"
-#directory_name="190121_AK8PFHT800_TrimMass50"
-#directory_name="190121_PFHT500_PFMET100_PFMHT100_IDTight"
-#directory_name="190121_PFHT1050_AK8PFHT800_TrimMass50"
-directory_name="190318_PFHT1050_PFHT500_PFMET100_PFMHT100_IDTight"
+#directory_name="190115"
+#directory_name="190115_PFHT1050"
+#directory_name="190115_AK8PFHT800_TrimMass50"
+#directory_name="190115_PFHT500_PFMET100_PFMHT100_IDTight"
+#directory_name="190115_PFHT1050_AK8PFHT800_TrimMass50"
+#directory_name="190115_PFHT1050_PFHT500_PFMET100_PFMHT100_IDTight"
+directory_name="190428_PFHT1050_PFHTXXX_PFMETXXX_PFMHTXXX_IDTight"
 
 # Enter script directory
 cd $CMSSW_BASE/src/BoostAnalyzer17/
@@ -56,20 +57,23 @@ elif [[ "$channel_rootpath" == *"SingleMuon"* ]];then
         list_name="filelists/data/SingleMuon.txt"
 elif [[ "$channel_rootpath" == *"SingleElectron"* ]];then
         list_name="filelists/data/SingleElectron.txt"
+elif [[ "$channel_rootpath" == *"HTMHT"* ]];then
+        list_name="filelists/data/HTMHT.txt"
 elif [[ "$channel_rootpath" == *"MET"* ]];then
         list_name="filelists/data/MET.txt"
 elif [[ "$channel_rootpath" == *"SinglePhoton"* ]];then
         list_name="filelists/data/SinglePhoton.txt"
-elif [[ "$channel_rootpath" == *"SMS"* ]];then
-        list_name="filelists/signals/run.txt"
 else
         list_name="filelists/backgrounds/run.txt"
 fi
 
 echo $channel_rootpath > ${list_name}
 
-#filename=$(cut -d'/' -f8 filelists/*/*.txt) # This is for unskimmed ntuples
-filename=$(cut -d'/' -f12 filelists/*/*.txt) # This is for skimmed ntuples
+if [[ "$channel_rootpath" == *"cern"* ]];then
+  filename=$(cut -d'/' -f11 filelists/*/*.txt)
+else
+  filename=$(cut -d'/' -f9 filelists/*/*.txt)
+fi
 
 #echo $channel_rootpath > filelists/data/run.txt
 
@@ -83,6 +87,7 @@ du -hs "run.root"
 
 #mydate=$(date +%Y_%m_%d_%k_%M)
 #if [[ "$channel_rootpath" == *"JetHT"* ]];then
+	#xrdcp -f "run.root" "root://eosuser.cern.ch//eos/user/c/chuh/RazorBoost/${directory_name}/${filename}/${channel_name}" 2>&1 || exit_on_error $? 153 "Failed to transfer the file ${channel_rootpath}"
 	xrdcp -f "run.root" "root://eoscms.cern.ch//eos/cms/store/user/chuh/RazorBoost/${directory_name}/${filename}/${channel_name}" 2>&1 || exit_on_error $? 153 "Failed to transfer the file ${channel_rootpath}"
 #xrdcp -f "$channel_name.root" "root://cmseos.fnal.gov:1094//eos/uscms/store/user/kenai/xrootd_test/${channel_name}_${mydate}.root" 2>&1
 
