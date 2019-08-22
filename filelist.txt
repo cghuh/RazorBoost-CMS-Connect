@@ -495,7 +495,6 @@ root://cmseos.fnal.gov//store/user/chuh/ntuple_RazorBoost17/WWTo1L1Nu2Q_13TeV_am
 root://cmseos.fnal.gov//store/user/chuh/ntuple_RazorBoost17/WWTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/skim_884.root
 root://cmseos.fnal.gov//store/user/chuh/ntuple_RazorBoost17/WWTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/skim_885.root
 root://cmseos.fnal.gov//store/user/chuh/ntuple_RazorBoost17/WWTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/skim_886.root
-root://cmseos.fnal.gov//store/user/chuh/ntuple_RazorBoost17/WWTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/skim_887.root
 root://cmseos.fnal.gov//store/user/chuh/ntuple_RazorBoost17/WWTo2L2Nu_NNPDF31_TuneCP5_13TeV-powheg-pythia8/skim_674.root
 root://cmseos.fnal.gov//store/user/chuh/ntuple_RazorBoost17/WWTo4Q_NNPDF31_TuneCP5_13TeV-powheg-pythia8/skim_675.root
 root://cmseos.fnal.gov//store/user/chuh/ntuple_RazorBoost17/WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8/skim_682.root
