@@ -79,7 +79,7 @@ fi
 
 # Execute ROOT script
 mydate=$(date +%Y_%m_%d)
-./Analyzer ${list_name} run.root || exit_on_error $? 152 "Failed running script with ${channel_rootpath}"
+./Analyzer run.root ${list_name} || exit_on_error $? 152 "Failed running script with ${channel_rootpath}"
 #root -b -q -l addvarstotree.C+"(\"$channel_rootpath/*.root\",\"$channel_name.root\")" || exit_on_error $? 152 "Failed running ROOT script."
 
 echo "Output file size: "
