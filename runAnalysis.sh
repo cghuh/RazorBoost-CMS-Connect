@@ -51,7 +51,9 @@ source setup.sh
 #wget --no-check-certificate --progress=bar "http://stash.osgconnect.net/+khurtado/rootlogon.C" || exit_on_error $? 150 "Could not download rootlogon."
 
 #make -Bj;
-if [[ "$channel_rootpath" == *"JetHT"* ]];then
+if [[ "$channel_rootpath" == *"SMS"* ]];then
+        list_name="filelists/signals/run.txt"
+elif [[ "$channel_rootpath" == *"JetHT"* ]];then
         list_name="filelists/data/JetHT.txt"
 elif [[ "$channel_rootpath" == *"SingleMuon"* ]];then
         list_name="filelists/data/SingleMuon.txt"
