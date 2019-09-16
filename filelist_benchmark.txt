@@ -1,0 +1,5 @@
+root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/SMS-T1tttt_TuneCP2_13TeV-madgraphMLM-pythia8_RunIIFall17NanoAODv4/SMS-T1tttt_TuneCP2_13TeV-madgraphMLM-pythia8_RunIIFall17NanoAODv4.root
+root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/SMS-T2tt_mStop-400to1200_TuneCP2_13TeV-madgraphMLM-pythia8/SMS-T2tt_mStop-400to1200_TuneCP2_13TeV-madgraphMLM-pythia8.root
+root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/SMS-T5qqqqVV_TuneCP2_13TeV-madgraphMLM-pythia8_RunIIFall17NanoAODv4/SMS-T5qqqqVV_TuneCP2_13TeV-madgraphMLM-pythia8.root
+root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/SMS-T5ttcc_TuneCP2_13TeV-madgraphMLM-pythia8_RunIIFall17NanoAODv4/SMS-T5ttcc_TuneCP2_13TeV-madgraphMLM-pythia8_RunIIFall17NanoAODv4.root
+root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/SMS-TChiWZ/SMS-TChiWZ.root
