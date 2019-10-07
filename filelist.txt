@@ -720,6 +720,11 @@ root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/WWToLNuQQ_NNP
 root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/WWToLNuQQ_NNPDF31_TuneCP5_13TeV-powheg-pythia8/skim_679.root
 root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/WWToLNuQQ_NNPDF31_TuneCP5_13TeV-powheg-pythia8/skim_680.root
 root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/WWToLNuQQ_NNPDF31_TuneCP5_13TeV-powheg-pythia8/skim_681.root
+root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8_v2/skim_857.root
+root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8_v2/skim_858.root
+root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8_v2/skim_859.root
+root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8_v2/skim_860.root
+root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8_v2/skim_861.root
 root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/HTMHT_Run2017B/skim_0.root
 root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/HTMHT_Run2017B/skim_1.root
 root://eoscms.cern.ch//eos/cms/store/user/chuh/ntuple_RazorBoost17/HTMHT_Run2017B/skim_2.root
