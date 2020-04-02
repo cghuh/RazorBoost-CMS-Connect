@@ -3606,7 +3606,6 @@ root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/2018
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/2018/data/MET_Run2018D/EEE738C5-B772-9344-8F03-82756D882993.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/2018/data/MET_Run2018D/EF759EC0-521D-1940-9A08-72384D4C4890.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/2018/data/MET_Run2018D/F34B4556-E89B-AC4A-82D3-6971B1D0D170.root
-root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/2018/data/MET_Run2018D/F6EBC9F1-76D1-974F-B106-C64266F49619.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/2018/data/MET_Run2018D/F87E6C78-EF70-1D41-A61E-AC1A99D6AD35.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/2018/data/MET_Run2018D/F8AD26BC-5E19-1545-86A9-55E674293C47.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/2018/data/MET_Run2018D/FA77BE92-9814-7848-A0FE-7CB357CFFA0B.root
