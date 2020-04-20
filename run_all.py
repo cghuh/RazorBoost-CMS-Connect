@@ -11,8 +11,8 @@ parser.add_option("--run",         dest="run",         action="store_true", defa
 parser.add_option("--full",        dest="full",        action="store_true", default=False, help="Run on all datasets found in filelists directory")
 parser.add_option("--test",        dest="test",        action="store_true", default=False, help="Run only on some test files (jetht, ttbar, qcd, T5ttcc)")
 parser.add_option("--batch",       dest="batch",       action="store_true", default=False, help="Send the jobs to batch")
-parser.add_option("--condor",      dest="condor",      action="store_true", default=False, help="Send the jobs to condor")
-parser.add_option("--queue",       dest="QUEUE",       type="string",       default="1nh", help="Specify which batch queue to use (Default=1nh)")
+parser.add_option("--condor",      dest="condor",      action="store_true", default=True,  help="Send the jobs to condor")
+parser.add_option("--queue",       dest="QUEUE",       type="string",       default="1nh", help="Specify which batch queue to use on LxBatch (Default=1nh)")
 parser.add_option("--optim",       dest="optim",       action="store_true", default=True,  help="Optimize job event number based log files in --prevdir, or measured skim ratios")
 parser.add_option("--prevdir",     dest="PREVDIR",     type="string",       default="",    help="Previous running directory used to optimize jobs (default=last dir in results/)")
 parser.add_option("--jobtime",     dest="JOBTIME",     type="int",          default=1500,  help="Desired job running time in s (default=1500)")
@@ -147,20 +147,19 @@ if opt.NQUICK>1:
 if opt.recover:
     saved_path = os.getcwd()
     os.chdir(EXEC_PATH)
-    input_filelists  = sorted(glob.glob("filelists/data/*.txt"))
-    input_filelists += sorted(glob.glob("filelists/backgrounds/*.txt"))
-    input_filelists += sorted(glob.glob("filelists/signals/*.txt"))
-    ####    input_filelists = glob.glob("filelists/signals/FastSim_SMS-T5ttcc_*.txt")    
+    input_filelists  = sorted(glob.glob("filelists/*/data/*.txt"))
+    input_filelists += sorted(glob.glob("filelists/*/backgrounds/*.txt"))
+    input_filelists += sorted(glob.glob("filelists/*/signals/*.txt"))
     os.chdir(saved_path)
 elif opt.full:
-    input_filelists  = sorted(glob.glob("filelists/data/*.txt"))
-    input_filelists += sorted(glob.glob("filelists/backgrounds/*.txt"))
-    input_filelists += sorted(glob.glob("filelists/signals/*.txt"))
+    input_filelists  = sorted(glob.glob("filelists/*/data/*.txt"))
+    input_filelists += sorted(glob.glob("filelists/*/backgrounds/*.txt"))
+    input_filelists += sorted(glob.glob("filelists/*/signals/*.txt"))
 elif opt.test:
-    input_filelists  = sorted(glob.glob("filelists/data/JetHT*.txt"))
-    input_filelists += sorted(glob.glob("filelists/backgrounds/QCD_HT*.txt"))
-    input_filelists += sorted(glob.glob("filelists/backgrounds/TT_powheg-pythia8_ext4*.txt"))
-    input_filelists += sorted(glob.glob("filelists/signals/FastSim_SMS-T5ttcc*.txt"))
+    input_filelists  = sorted(glob.glob("filelists/2017/data/JetHT*.txt"))
+    input_filelists += sorted(glob.glob("filelists/2017/backgrounds/QCD_HT*.txt"))
+    input_filelists += sorted(glob.glob("filelists/2017/backgrounds/TT_powheg-pythia8_ext4*.txt"))
+    input_filelists += sorted(glob.glob("filelists/2017/signals/FastSim_SMS-T5ttcc*.txt"))
 elif not opt.replot and len(args) < 1:
     print "Always tell me what filelists to run over (except when using --full or --test options)!"
     print "For more help, run as python %s -h" % (sys.argv[0])
@@ -201,7 +200,7 @@ if opt.useprev:
     print "Reusing previously created temporary filelists for split jobs (eg. --batch) in filelists_tmp/:"
 elif (opt.NFILE != -1 or opt.NEVT != -1):
     print "Start creating new temporary filelists for split jobs (eg. batch) in filelists_tmp/:"
-    for tmp_txtfile in glob.glob('filelists_tmp/*/*.txt'): os.remove(tmp_txtfile)
+    for tmp_txtfile in glob.glob('filelists_tmp/*/*/*.txt'): os.remove(tmp_txtfile)
     if os.path.exists('filelists_tmp/job_splitting.txt'): os.remove('filelists_tmp/job_splitting.txt')
 
 ana_arguments = []
@@ -241,26 +240,34 @@ def get_optim_ratios(opt, samplename):
                 # If no optimization found (happens rarely for new samples), use 0.2 (to be safe for all samples)
                 # Make sure to remake the job_ratios.txt file after the run!
                 if not optim_found:
-                    print "No optimization found for "+samplename+" using 0.2"
-                    optim = 0.2
+                    print "No optimization found for "+samplename+" using 2.0"
+                    optim = 2.0
         optim_ratios[samplename] = optim
         return optim
 
 # Loop over all filelists
 for filelist in input_filelists:
-    # Will put all files into the OUTDIR and its subdirectories
-    log_file = opt.OUTDIR+"/log/"+filelist.split("/")[-1].replace("txt", "log")
-    if opt.skim:
-        # Except for skim, where we send the large output files to a different directory
-        # keeping subdirectory structure (suitable for a future input )
-        output_file = opt.SKIMOUT+"/"+filelist.split("/")[-1].replace(".txt","/Skim.root")
-    else:
-        output_file = opt.OUTDIR +"/"+filelist.split("/")[-1].replace("txt", "root")
-    
     # Options for Analyzer
     options = []
     if opt.NQUICK>1: options.append("quickTest="+str(opt.NQUICK))
     if opt.skim and not opt.plot: options.append("noPlots=1")
+    
+    # decide year, based on subdirectory
+    year="2016"
+    if "/2017/" in filelist:
+        year = "2017"
+    elif "/2018/" in filelist:
+        year = "2018"
+    options.append("year="+year)
+    
+    # Will put all files into the OUTDIR and its subdirectories
+    log_file = opt.OUTDIR+"/log/"+year+"_"+filelist.split("/")[-1].replace("txt", "log")
+    if opt.skim:
+        # Except for skim, where we send the large output files to a different directory
+        # keeping subdirectory structure (suitable for a future input )
+        output_file = opt.SKIMOUT+"/"+year+"_"+filelist.split("/")[-1].replace(".txt","/Skim.root")
+    else:
+        output_file = opt.OUTDIR +"/"+year+"_"+filelist.split("/")[-1].replace("txt", "root")
     
     # Temporary filelists
     if opt.useprev:
@@ -544,7 +551,7 @@ def backup_files(backup_dir, creation_time, update):
         print "Backing up files in: "+backup_dir
         print
     if not os.path.exists(backup_dir): special_call(["mkdir", "-p", backup_dir], opt.run)
-    special_call(["cp", "-rp", "btag_eff", "../RazorBoost-CMS-Connect", "data", "filelists", "filelists_tmp", "include", "lib", "pileup", "python", "scale_factors", "src", "systematics", "trigger_eff", "setup.sh"] + glob.glob("*.h") + glob.glob("*.cc") + glob.glob("*ratios.txt") + glob.glob("Makefile*") + [backup_dir+"/"], opt.run)
+    special_call(["cp", "-rp", "btag_eff", "../RazorBoost-CMS-Connect", "correction_factors", "data", "filelists", "filelists_tmp", "include", "lib", "pileup", "python", "scale_factors", "src", "systematics", "trigger_eff", "setup.sh"] + glob.glob("*.h") + glob.glob("*.cc") + glob.glob("*ratios.txt") + glob.glob("Makefile*") + [backup_dir+"/"], opt.run)
     special_call(["mv", backup_dir+"/RazorBoost-CMS-Connect", backup_dir+"/condor"], opt.run)
     special_call(["rm", "-rf", backup_dir+"/condor/.git"], opt.run)
     if not opt.update:
@@ -909,7 +916,7 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
                                                         jobruntime =  int(time.time()) - time_job_start
                                                     if jobruntime <= target_time/4.0:
                                                         if time_first_event == 0:
-                                                            print "This used to fail"
+                                                            print "First processed event does not appear after a long runtime"
                                                             print "runtime: "+str(runtime)
                                                             print "jobruntime: "+str(jobruntime)
                                                             print "Check log: "+os.path.basename(output_stdout)
