@@ -551,7 +551,7 @@ def backup_files(backup_dir, creation_time, update):
         print "Backing up files in: "+backup_dir
         print
     if not os.path.exists(backup_dir): special_call(["mkdir", "-p", backup_dir], opt.run)
-    special_call(["cp", "-rp", "btag_eff", "../RazorBoost-CMS-Connect", "correction_factors", "data", "filelists", "filelists_tmp", "include", "lib", "pileup", "python", "scale_factors", "src", "systematics", "trigger_eff", "setup.sh"] + glob.glob("*.h") + glob.glob("*.cc") + glob.glob("*ratios.txt") + glob.glob("Makefile*") + [backup_dir+"/"], opt.run)
+    special_call(["cp", "-rp", "btag_eff", "../RazorBoost-CMS-Connect", "correction_factors", "data", "filelists", "filelists_tmp", "include", "pileup", "python", "scale_factors", "src", "systematics", "trigger_eff", "setup.sh"] + glob.glob("*.h") + glob.glob("*.cc") + glob.glob("*ratios.txt") + glob.glob("Makefile*") + [backup_dir+"/"], opt.run)
     special_call(["mv", backup_dir+"/RazorBoost-CMS-Connect", backup_dir+"/condor"], opt.run)
     special_call(["rm", "-rf", backup_dir+"/condor/.git"], opt.run)
     if not opt.update:
