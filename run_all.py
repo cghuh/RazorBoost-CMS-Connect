@@ -309,7 +309,7 @@ for filelist in input_filelists:
         # Further optimize this number
         # based on measured unskimmed to skimmed ratios (found in skim_ratios.txt)
         if opt.optim:
-            samplename = filelist.split("/")[-1][:-4]
+            samplename = year+"_"+filelist.split("/")[-1][:-4]
             nevtperjob_sample = int(get_optim_ratios(opt, samplename) * opt.NEVT)
         
         # Loop on file lists and split to tmp_filelists for nevt < nevtperjob_sample
