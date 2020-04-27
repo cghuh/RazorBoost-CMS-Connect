@@ -1,8 +1,8 @@
 #!/bin/bash
 echo   "UnixTime-JobStart: "$(date +%s)
 
-arch=slc6_amd64_gcc700
-rel=CMSSW_10_2_16
+arch=slc7_amd64_gcc700
+rel=CMSSW_10_2_18
 sandbox=$(ls sandbox*.tar.bz2)
 arguments=${@:1}
 cwd=$(pwd)
