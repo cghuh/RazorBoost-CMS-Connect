@@ -4,7 +4,7 @@ ANA_BASE = os.environ['CMSSW_BASE']+'/src/BoostAnalyzer17'
 if 'grid18.kfki.hu' in socket.gethostname(): ANA_BASE='/data/jkarancs/CMSSW/BoostAnalyzer17'
 vf = ["condor/filelist_2016.txt", "condor/filelist_2017.txt", "condor/filelist_2018.txt"]
 
-print "Creating file lists ... ",
+print "Creating file lists ... "
 if not os.path.exists(ANA_BASE+'/filelists/2016/data'):        os.makedirs(ANA_BASE+'/filelists/2016/data')
 if not os.path.exists(ANA_BASE+'/filelists/2016/signals'):     os.makedirs(ANA_BASE+'/filelists/2016/signals')
 if not os.path.exists(ANA_BASE+'/filelists/2016/backgrounds'): os.makedirs(ANA_BASE+'/filelists/2016/backgrounds')
@@ -49,7 +49,8 @@ for flist in vf:
                 print>>flist, filename
 print 'Done.'
 
-print "Creating an input event number txt file ... ",
+print "Creating an input event number txt file ... "
+
 bad_files = open("bad_files_found.txt", "w")
 if os.path.exists("condor/filelist_and_counts.txt"):
     os.remove("condor/filelist_and_counts.txt")
@@ -75,7 +76,8 @@ for flist in vf:
                         print>>bad_files, filename+" no tree"
 
 
-print "Creating temp file list directories (for batch and split jobs) ... ",
+print "Creating temp file list directories (for batch and split jobs) ... "
+
 if not os.path.exists(ANA_BASE+'/filelists_tmp/2016/data'):        os.makedirs(ANA_BASE+'/filelists_tmp/2016/data')
 if not os.path.exists(ANA_BASE+'/filelists_tmp/2016/signals'):     os.makedirs(ANA_BASE+'/filelists_tmp/2016/signals')
 if not os.path.exists(ANA_BASE+'/filelists_tmp/2016/backgrounds'): os.makedirs(ANA_BASE+'/filelists_tmp/2016/backgrounds')
