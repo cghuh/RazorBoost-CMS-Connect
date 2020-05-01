@@ -24,7 +24,7 @@ export SCRAM_ARCH=$arch
 echo -e "\n[2] scramv1 project CMSSW $rel"
 scramv1 project CMSSW $rel
 
-echo -e "\n[3] tar -xjf $sandbox -C $rel/src/"
+echo -e "\n[3] tar -xf $sandbox -C $rel/src/"
 tar -xf $sandbox -C $rel/src/
 
 echo -e "\n[4] cd $rel/src/BoostAnalyzer17"
