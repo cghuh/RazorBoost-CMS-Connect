@@ -18,7 +18,7 @@ echo -e "---------------- Environments ----------------"
 echo -e "\n[0] source /cvmfs/cms.cern.ch/cmsset_default.sh"
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 
-echo -e "\n[1] export SCRAM_ARCH=$arch"
+echo -e "\n[1] export SCRAM_ARCH= $arch"
 export SCRAM_ARCH=$arch
 
 echo -e "\n[2] scramv1 project CMSSW $rel"
@@ -54,7 +54,10 @@ cd -
 echo -e "\n[9] rm -r $rel"
 rm -r $rel
 
-echo -e "\n[10] ls -ltr"
+echo -e "\n[10] rm -r $sandbox"
+rm -r $sandbox
+
+echo -e "\n[11] ls -ltr"
 ls -ltr
 
 # delete output file if too small
