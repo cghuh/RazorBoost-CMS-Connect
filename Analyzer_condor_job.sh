@@ -2,7 +2,7 @@
 echo   "UnixTime-JobStart: "$(date +%s)
 
 arch=slc7_amd64_gcc700
-rel=CMSSW_10_2_18
+rel=CMSSW_10_6_11_patch1
 sandbox=$(ls sandbox*.tar.bz2)
 arguments=${@:1}
 cwd=$(pwd)
