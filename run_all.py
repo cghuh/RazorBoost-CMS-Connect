@@ -581,10 +581,9 @@ def create_sandbox(backup_dir, update):
     print "Creating sandbox for condor"
     print
     sandbox = os.path.split(backup_dir)[0]+"/sandbox-BoostAnalyzer17.tar.bz2"
-    toSandbox = os.path.split(backup_dir)[0]+"/BoostAnalyzer17/"
     if update:
         special_call(["rm", sandbox], opt.run)
-    special_call(["tar", "-cf", sandbox, toSandbox], opt.run)
+    special_call(["tar", "-cjf", sandbox, "-C", os.path.split(backup_dir)[0], "BoostAnalyzer17"], opt.run)
     print
 
 # Run a single Analyzer instance (on a single input list, i.e. one dataset)
@@ -721,13 +720,33 @@ def merge_output(ana_arguments, last_known_status):
                     #  Check that the result has the right size (if not, delete)
                     if os.path.isfile(output):
                         if os.path.getsize(output) < 1000: os.remove(output)
-    # Do a final merging when all outputs are ready
-    if nrdy == njob:
-        final_hadded_filename = opt.OUTDIR+".root"
+    # Do partial merging when a year and data type is ready
+    all_ready = []
+    saved_path = os.getcwd()
+    os.chdir(EXEC_PATH)
+    alldir = sorted(glob.glob("filelists/*/*"))
+    os.chdir(saved_path)
+    for listdir in alldir:
+        haddoutfile = (EXEC_PATH+"/"+listdir).replace("BoostAnalyzer17/filelists","hadd").replace("2016/","2016_").replace("2017/","2017_").replace("2018/","2018_")+".root"
+        if os.path.exists(haddoutfile):
+            all_ready.append(haddoutfile)
+        else:
+            #print allitem
+            ready = []
+            allitem = sorted(glob.glob(EXEC_PATH+"/"+listdir+"/*.txt"))
+            for item in allitem:
+                hadded = item.replace("BoostAnalyzer17/filelists/","hadd/").replace("/data/","_").replace("/signals/","_").replace("/backgrounds/","_").replace(".txt",".root")
+                if os.path.exists(hadded): ready.append(hadded)
+            if len(ready) == len(allitem) and not os.path.exists(haddoutfile):
+                print "Larger set of jobs ready, merging output files into: "+haddoutfile
+                logged_call(["hadd", "-f", "-v", haddoutfile]+ready, haddoutfile.replace("hadd","hadd/log").replace(".root",".log"), opt.run)
+                all_ready.append(haddoutfile)
+    # And finally merge all partial output files to a single final output file
+    final_hadded_filename = opt.OUTDIR+".root"
+    if len(all_ready) == len(alldir) and not os.path.exists(final_hadded_filename):
         print "All jobs are ready, merging all output files into: "+final_hadded_filename
-        if not os.path.exists(final_hadded_filename):
-            logged_call(["hadd", "-f", "-v", final_hadded_filename]+all_hadded, opt.OUTDIR+"/hadd/log/final.log", opt.run)
-
+        logged_call(["hadd", "-f", "-v", final_hadded_filename]+all_ready, opt.OUTDIR+"/hadd/log/final.log", opt.run)
+        
 def get_input_count(opt, ana_arguments, jobindex):
     input_count = 0
     if opt.useprev or opt.NEVT != -1 or opt.optim:
@@ -858,7 +877,12 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
                                             # From now on we need to comfirm:
                                             # 1) The Analyzer started running and is not stuck at the First event
                                             # 2) The read speed is as good as expected
-                                            samplename = "_".join(tmp_filelist.split("/")[-1].split("_")[:-1])
+                                            year="2016"
+                                            if "/2017/" in tmp_filelist:
+                                                year = "2017"
+                                            elif "/2018/" in tmp_filelist:
+                                                year = "2018"
+                                            samplename = year+"_"+("_".join(tmp_filelist.split("/")[-1].split("_")[:-1]))
                                             optim      = get_optim_ratios(opt, samplename)
                                             target_time = 7200
                                             maxratio = 6.0 # Maximum allowed ratio of target nps to actual nps
