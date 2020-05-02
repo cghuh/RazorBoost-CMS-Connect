@@ -583,7 +583,7 @@ def create_sandbox(backup_dir, update):
     sandbox = os.path.split(backup_dir)[0]+"/sandbox-BoostAnalyzer17.tar.bz2"
     if update:
         special_call(["rm", sandbox], opt.run)
-    special_call(["tar", "-cjf", sandbox, "-C", os.path.split(backup_dir)[0], "BoostAnalyzer17"], opt.run)
+    special_call(["tar", "-cf", sandbox, "-C", os.path.split(backup_dir)[0], "BoostAnalyzer17"], opt.run)
     print
 
 # Run a single Analyzer instance (on a single input list, i.e. one dataset)
