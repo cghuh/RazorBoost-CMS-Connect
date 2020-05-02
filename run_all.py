@@ -568,10 +568,10 @@ def compile(Ana = 1, Plotter = 1):
     if opt.run: os.chdir(EXEC_PATH)
     special_call(["make", "clean"], opt.run)
     if Ana:
-        special_call(["make", "-j8", "Analyzer"], opt.run)
+        special_call(["make", "-j", "Analyzer"], opt.run)
         special_call(["chmod", "777", "Analyzer"], opt.run)
     if Plotter:
-        special_call(["make", "-j8", "Plotter"], opt.run)
+        special_call(["make", "-j", "Plotter"], opt.run)
         special_call(["chmod", "777", "Plotter"], opt.run)
     # Copy the results folder to the uscms stash server
     if opt.run: os.chdir(saved_path)
