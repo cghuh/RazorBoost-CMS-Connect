@@ -2,7 +2,7 @@
 echo   "UnixTime-JobStart: "$(date +%s)
 
 arch=slc7_amd64_gcc700
-rel=CMSSW_10_6_11_patch1
+rel=CMSSW_10_2_18
 sandbox=$(ls sandbox*.tar.bz2)
 arguments=${@:1}
 cwd=$(pwd)
@@ -18,7 +18,7 @@ echo -e "---------------- Environments ----------------"
 echo -e "\n[0] source /cvmfs/cms.cern.ch/cmsset_default.sh"
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 
-echo -e "\n[1] export SCRAM_ARCH= $arch"
+echo -e "\n[1] export SCRAM_ARCH=$arch"
 export SCRAM_ARCH=$arch
 
 echo -e "\n[2] scramv1 project CMSSW $rel"
@@ -37,6 +37,14 @@ echo -e "\n[6] source setup.sh"
 source setup.sh
 
 echo -e "\n------------------ Analyzer ------------------"
+echo -e "\n[6.1] make clean"
+make clean
+
+echo -e "\n[6.2] make -j Analyzer"
+make -j Analyzer
+
+echo -e "\n[6.3] make -j Plotter"
+make -j Plotter
 
 echo   "UnixTime-AnalyzerStart: "$(date +%s)
 
@@ -54,10 +62,10 @@ cd -
 echo -e "\n[9] rm -r $rel"
 rm -r $rel
 
-echo -e "\n[10] rm -r $sandbox"
-rm -r $sandbox
+echo -e "\n[9.5] rm $sandbox"
+rm $sandbox
 
-echo -e "\n[11] ls -ltr"
+echo -e "\n[10] ls -ltr"
 ls -ltr
 
 # delete output file if too small
