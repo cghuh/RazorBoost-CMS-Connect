@@ -2,7 +2,8 @@ import os, re, sys, glob, socket, subprocess, ROOT
 
 ANA_BASE = os.environ['CMSSW_BASE']+'/src/BoostAnalyzer17'
 if 'grid18.kfki.hu' in socket.gethostname(): ANA_BASE='/data/jkarancs/CMSSW/BoostAnalyzer17'
-vf = ["condor/filelist_2016.txt", "condor/filelist_2017.txt", "condor/filelist_2018.txt"]
+vf = ["condor/filelist_unskim_2016.txt", "condor/filelist_unskim_2017.txt", "condor/filelist_unskim_2018.txt"]
+#vf = ["condor/filelist_2016.txt", "condor/filelist_2017.txt", "condor/filelist_2018.txt"]
 
 print "Creating file lists ... ",
 if not os.path.exists(ANA_BASE+'/filelists/2016/data'):        os.makedirs(ANA_BASE+'/filelists/2016/data')
@@ -32,21 +33,24 @@ for flist in vf:
             for i in range(2,len(filename.split("/"))+1):
                 subdir = filename.split("/")[-i]
                 if len(subdir):
-                    if sample == "" and not subdir[0].isdigit():
-                        if not subdir.startswith("PU") and not subdir.startswith("NANOAOD"):
+                    if (sample == "" and not subdir[0].isdigit() and not subdir.startswith("PU") and not
+                        subdir.startswith("NANOAOD") and not subdir.startswith("Nano")):
+                        if "unskim" in flist and "/data/" in filename:
+                            sample = subdir+"_"+filename.split("/")[-(i+1)]
+                        else:
                             sample = subdir
             # Data
             if re.compile('.*20[1-2][0-9][A-J].*').match(sample):
-                flist = open(ANA_BASE+'/filelists/'+year+'/data/'+sample+'.txt', 'a')
-                print>>flist, filename
+                fl = open(ANA_BASE+'/filelists/'+year+'/data/'+sample+'.txt', 'a')
+                print>>fl, filename
             # Signals
             elif re.compile('.*T[1-9][t,b,c,q,W,Z,H][t,b,c,q,W,Z,H].*').match(sample) or "TChi" in sample:
-                flist = open(ANA_BASE+'/filelists/'+year+'/signals/'+sample+'.txt', 'a')
-                print>>flist, filename
+                fl = open(ANA_BASE+'/filelists/'+year+'/signals/'+sample+'.txt', 'a')
+                print>>fl, filename
             # Backgrounds
             else:
-                flist = open(ANA_BASE+'/filelists/'+year+'/backgrounds/'+sample+'.txt', 'a')
-                print>>flist, filename
+                fl = open(ANA_BASE+'/filelists/'+year+'/backgrounds/'+sample+'.txt', 'a')
+                print>>fl, filename
 print 'Done.'
 
 print "Creating an input event number txt file ... ",
@@ -54,7 +58,7 @@ bad_files = open("bad_files_found.txt", "w")
 if os.path.exists("condor/filelist_and_counts.txt"):
     os.remove("condor/filelist_and_counts.txt")
 for flist in vf:
-    countsfile = open("condor/filelist_and_counts_test.txt", 'a')
+    countsfile = open("condor/filelist_and_counts.txt", 'a')
     with open(flist) as filelist:
         for line in filelist:
             filename = line.split()[0]

@@ -645,6 +645,14 @@ def analyzer_job((jobindex)):
                 #print>>script, 'srm-set-permissions -type=CHANGE -group=RW '+EOS_VIKTOR+outpath
     return output_file
 
+
+def hadd_job(output, list, log, batch=True):
+    if batch:
+        special_call(["truncate", "-s", "1K", output], opt.run, 0)
+        logged_call(["condor/submit_condor_task.sh", "hadd", ",".join(list), output, log.replace(".log","")], log.replace(".log","_condor.log"), opt.run)
+    else:
+        logged_call(["hadd", "-f", "-v", output]+list, log, opt.run)
+
 def merge_output(ana_arguments, last_known_status):
     # Check list of files ready to be merged (with hadd)
     if not os.path.exists(opt.OUTDIR+"/hadd"): special_call(["mkdir", "-p", opt.OUTDIR+"/hadd"], opt.run, 0)
@@ -684,37 +692,41 @@ def merge_output(ana_arguments, last_known_status):
             else:
                 # Multiple files will be hadded
                 print str(len(allinput))+" files for "+output+" are ready to be merged"
-                while not os.path.exists(output):
+                if not os.path.exists(output):
                     #logged_call(["hadd", "-f", "-v", "-n", "200"]+all_mergeables[i], all_mergeables[i][0].rsplit("/",1)[0]+"/log/"+all_mergeables[i][0].rsplit("/",1)[1].replace(".root",".log"), opt.run)
                     # hadd produces problems when merging too many files
-                    # so we merge files in chunks of 100 files each
+                    # so we merge files in chunks of maximum 100 files each
                     # problems happen typically over a few hundred input files
                     Nmerge = 100
                     alltmp = []
                     if len(allinput)<Nmerge:
                         # Simple hadding all output files
-                        logged_call(["hadd", "-f", "-v", output]+allinput, log, opt.run)
+                        hadd_job(output, allinput, log)
                     else:
                         # Two staged hadding:
                         # - First merge every Nmerge files to temp files
                         for n in range(1, (len(allinput)-1)/Nmerge+2):
-                            tmplist = []
-                            for i in range((n-1)*Nmerge, min(n*Nmerge,len(allinput))): tmplist.append(allinput[i])
                             tmpoutput = output.replace(".root","_"+str(n)+".root")
-                            tmplog    = tmpoutput.rsplit("/",1)[0]+"/log/"+tmpoutput.rsplit("/",1)[1].replace(".root",".log")
-                            alltmp.append(tmpoutput)
-                            print "- Merging into temp file: "+tmpoutput
-                            logged_call(["hadd", "-f", "-v", tmpoutput]+tmplist, tmplog, opt.run)
+                            if os.path.isfile(tmpoutput):
+                                if os.path.getsize(tmpoutput)>1024:
+                                    alltmp.append(tmpoutput)
+                            else:
+                                tmplist = []
+                                for i in range((n-1)*Nmerge, min(n*Nmerge,len(allinput))): tmplist.append(allinput[i])
+                                tmplog    = tmpoutput.rsplit("/",1)[0]+"/log/"+tmpoutput.rsplit("/",1)[1].replace(".root",".log")
+                                print "- Merging into temp file: "+tmpoutput
+                                hadd_job(tmpoutput, tmplist, tmplog)
                         # - then merge the resulting temp files into a single file
                         #   and remove the temporary files
-                        print "- Merging temp files into: "+output
-                        logged_call(["hadd", "-f", "-v", output]+alltmp, log, opt.run)
-                        for tmpfile in alltmp:
-                            if os.path.isfile(tmpfile):
-                                os.remove(tmpfile)
-                            else:
-                                print "Something went wrong with the hadding of tmp file: "+tmpfile
-                                sys.exit()
+                        if len(alltmp) == (len(allinput)-1)/Nmerge+1:
+                            print "- Merging temp files into: "+output
+                            hadd_job(output, alltmp, log)
+                            for tmpfile in alltmp:
+                                if os.path.isfile(tmpfile):
+                                    os.remove(tmpfile)
+                                else:
+                                    print "Something went wrong with the hadding of tmp file: "+tmpfile
+                                    sys.exit()
                     #  Check that the result has the right size (if not, delete)
                     if os.path.isfile(output):
                         if os.path.getsize(output) < 1000: os.remove(output)
@@ -727,7 +739,8 @@ def merge_output(ana_arguments, last_known_status):
     for listdir in alldir:
         haddoutfile = (EXEC_PATH+"/"+listdir).replace("BoostAnalyzer17/filelists","hadd").replace("2016/","2016_").replace("2017/","2017_").replace("2018/","2018_")+".root"
         if os.path.exists(haddoutfile):
-            all_ready.append(haddoutfile)
+            if os.path.getsize(haddoutfile)>1024:
+                all_ready.append(haddoutfile)
         else:
             #print allitem
             ready = []
@@ -737,13 +750,13 @@ def merge_output(ana_arguments, last_known_status):
                 if os.path.exists(hadded): ready.append(hadded)
             if len(ready) == len(allitem) and not os.path.exists(haddoutfile):
                 print "Larger set of jobs ready, merging output files into: "+haddoutfile
-                logged_call(["hadd", "-f", "-v", haddoutfile]+ready, haddoutfile.replace("hadd","hadd/log").replace(".root",".log"), opt.run)
+                hadd_job(haddoutfile, ready, haddoutfile.replace("hadd","hadd/log").replace(".root",".log"))
                 all_ready.append(haddoutfile)
     # And finally merge all partial output files to a single final output file
     final_hadded_filename = opt.OUTDIR+".root"
     if len(all_ready) == len(alldir) and not os.path.exists(final_hadded_filename):
         print "All jobs are ready, merging all output files into: "+final_hadded_filename
-        logged_call(["hadd", "-f", "-v", final_hadded_filename]+all_ready, opt.OUTDIR+"/hadd/log/final.log", opt.run)
+        hadd_job(final_hadded_filename, all_ready, opt.OUTDIR+"/hadd/log/final.log", False)
 
 def get_input_count(opt, ana_arguments, jobindex):
     input_count = 0
@@ -1110,7 +1123,7 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
                         clusterid = ""
                         latest_log_file = opt.OUTDIR+"/log/condor_task_"+str(batch_number)+".log"
                         submittime = int(time.time())
-                        logged_call(["condor/submit_condor_task.sh", opt.OUTDIR+"/sandbox-BoostAnalyzer17.tar.bz2", joblist_to_submit, site], latest_log_file, opt.run)
+                        logged_call(["condor/submit_condor_task.sh", site, opt.OUTDIR+"/sandbox-BoostAnalyzer17.tar.bz2", joblist_to_submit], latest_log_file, opt.run)
                         with open(latest_log_file) as latest_log:
                             for line in latest_log.readlines():
                                 if "submitted to cluster" in line:
