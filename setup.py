@@ -55,28 +55,36 @@ print 'Done.'
 
 print "Creating an input event number txt file ... ",
 bad_files = open("bad_files_found.txt", "w")
-if os.path.exists("condor/filelist_and_counts.txt"):
-    os.remove("condor/filelist_and_counts.txt")
+#if os.path.exists("condor/filelist_and_counts.txt"):
+#    os.remove("condor/filelist_and_counts.txt")
+
+# make a list of files already there
+counted_already = []
+with open("condor/filelist_and_counts.txt", 'r') as countsfile:
+    for line in countsfile:
+        counted_already.append(line.split()[0])
+
 for flist in vf:
     countsfile = open("condor/filelist_and_counts.txt", 'a')
     with open(flist) as filelist:
         for line in filelist:
             filename = line.split()[0]
-            fin = ROOT.TFile.Open(filename)
-            if not fin:
-                print filename+" is not a root file"
-                print>>bad_files, filename+" bad file"
-            else:
-                tree = fin.Get("Events")
-                if tree:
-                    if tree.GetEntries()>0:
-                        print>>countsfile, filename+" "+str(tree.GetEntries())
-                    else:
-                        print filename+" has 0 entries"
-                        print>>bad_files, filename+" 0 entry"
+            if filename not in counted_already:
+                fin = ROOT.TFile.Open(filename)
+                if not fin:
+                    print filename+" is not a root file"
+                    print>>bad_files, filename+" bad file"
                 else:
-                        print filename+" has no tree"
-                        print>>bad_files, filename+" no tree"
+                    tree = fin.Get("Events")
+                    if tree:
+                        if tree.GetEntries()>0:
+                            print>>countsfile, filename+" "+str(tree.GetEntries())
+                        else:
+                            print filename+" has 0 entries"
+                            print>>bad_files, filename+" 0 entry"
+                    else:
+                            print filename+" has no tree"
+                            print>>bad_files, filename+" no tree"
 
 
 print "Creating temp file list directories (for batch and split jobs) ... ",
