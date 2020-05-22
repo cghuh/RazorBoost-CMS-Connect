@@ -501,18 +501,19 @@ if opt.recover:
                 with open(TMPDIR+'batchstatus_'+clusterid+'.txt') as batchstatus:
                     lines = batchstatus.readlines()
                     for line in lines:
-                        if line.startswith(clusterid+"."):
-                            job_status = line.split()[5]
-                            if job_status != "X":
-                                jobid = line.split()[0]
-                                input_tmp_filelist = line.split()[9]
-                                for i in range(0, len(ana_arguments)):
-                                    if input_tmp_filelist == ana_arguments[i][1][0].replace(EXEC_PATH+"/",""):
-                                        jobindex = i
-                                last_known_status[jobindex] = int(time.time())
-                                last_condor_jobid[jobindex] = jobid
-                                #print "- Found running HTCondor job: ID = "+jobid+" ("+input_tmp_filelist+", jobindex = "+str(jobindex)+")"
-                                nrecov += 1
+                        for clusterid in cluster_ids:
+                            if line.startswith(clusterid+"."):
+                                job_status = line.split()[5]
+                                if job_status != "X":
+                                    jobid = line.split()[0]
+                                    input_tmp_filelist = line.split()[9]
+                                    for i in range(0, len(ana_arguments)):
+                                        if input_tmp_filelist == ana_arguments[i][1][0].replace(EXEC_PATH+"/",""):
+                                            jobindex = i
+                                    last_known_status[jobindex] = int(time.time())
+                                    last_condor_jobid[jobindex] = jobid
+                                    #print "- Found running HTCondor job: ID = "+jobid+" ("+input_tmp_filelist+", jobindex = "+str(jobindex)+")"
+                                    nrecov += 1
                 os.remove(TMPDIR+'batchstatus_'+cluster_ids[-1]+'.txt')
         else:
             # Check if the submission time is available
@@ -896,7 +897,7 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
                                             samplename = year+"_"+("_".join(tmp_filelist.split("/")[-1].split("_")[:-1]))
                                             optim      = get_optim_ratios(opt, samplename)
                                             target_time = 7200
-                                            maxratio = 6.0 # Maximum allowed ratio of target nps to actual nps
+                                            maxratio = 10.0 # Maximum allowed ratio of target nps to actual nps
                                             target_nps = opt.NEVT * optim / target_time
                                             max_possible_nps = get_input_count(opt, ana_arguments, jobindex) / (time.time()-starttime)
                                             runtime = int(time.time()) - starttime

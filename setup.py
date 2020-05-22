@@ -33,6 +33,7 @@ for flist in vf:
             for i in range(2,len(filename.split("/"))+1):
                 subdir = filename.split("/")[-i]
                 if len(subdir):
+                    # make sure the exclusion is the same in tnm.cc
                     if (sample == "" and not subdir[0].isdigit() and not subdir.startswith("PU") and not
                         subdir.startswith("NANOAOD") and not subdir.startswith("Nano")):
                         if "unskim" in flist and "/data/" in filename:
