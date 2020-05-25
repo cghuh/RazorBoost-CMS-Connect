@@ -40,7 +40,7 @@ parser.add_option("--update",      dest="update",      action="store_true", defa
 # Some further (usually) fixed settings, should edit them in this file
 
 # Make sure we start with a fresh token (lasts 24h)
-if 'lxplus' in socket.gethostname(): special_call(["kinit", "-R"], opt.run, 0)
+#if 'lxplus' in socket.gethostname(): special_call(["kinit", "-R"], opt.run, 0)
 
 # Output directories/files
 SUBTIME = time.strftime("%Y_%m_%d_%Hh%Mm%S", time.localtime())
@@ -654,7 +654,7 @@ def hadd_job(output, list, log, batch=True):
     else:
         logged_call(["hadd", "-f", "-v", output]+list, log, opt.run)
 
-def merge_output(ana_arguments, last_known_status):
+def merge_output(ana_arguments, last_known_status, finished):
     # Check list of files ready to be merged (with hadd)
     if not os.path.exists(opt.OUTDIR+"/hadd"): special_call(["mkdir", "-p", opt.OUTDIR+"/hadd"], opt.run, 0)
     prev_sample = ""
@@ -723,9 +723,10 @@ def merge_output(ana_arguments, last_known_status):
                             print "- Merging temp files into: "+output
                             hadd_job(output, alltmp, log)
                             for tmpfile in alltmp:
-                                if os.path.isfile(tmpfile):
-                                    os.remove(tmpfile)
-                                else:
+                                #if os.path.isfile(tmpfile):
+                                #    os.remove(tmpfile)
+                                #else:
+                                if not os.path.isfile(tmpfile):
                                     print "Something went wrong with the hadding of tmp file: "+tmpfile
                                     sys.exit()
                     #  Check that the result has the right size (if not, delete)
@@ -748,16 +749,21 @@ def merge_output(ana_arguments, last_known_status):
             allitem = sorted(glob.glob(EXEC_PATH+"/"+listdir+"/*.txt"))
             for item in allitem:
                 hadded = item.replace("BoostAnalyzer17/filelists/","hadd/").replace("/data/","_").replace("/signals/","_").replace("/backgrounds/","_").replace(".txt",".root")
-                if os.path.exists(hadded): ready.append(hadded)
-            if len(ready) == len(allitem) and not os.path.exists(haddoutfile):
-                print "Larger set of jobs ready, merging output files into: "+haddoutfile
-                hadd_job(haddoutfile, ready, haddoutfile.replace("hadd","hadd/log").replace(".root",".log"))
-                all_ready.append(haddoutfile)
+                if os.path.exists(hadded):
+                    if os.path.getsize(hadded)>1024:
+                        ready.append(hadded)
+            if len(ready) == len(allitem):
+                if not os.path.exists(haddoutfile):
+                    print "Larger set of jobs ready, merging output files into: "+haddoutfile
+                    hadd_job(haddoutfile, ready, haddoutfile.replace("hadd","hadd/log").replace(".root",".log"))
     # And finally merge all partial output files to a single final output file
     final_hadded_filename = opt.OUTDIR+".root"
     if len(all_ready) == len(alldir) and not os.path.exists(final_hadded_filename):
         print "All jobs are ready, merging all output files into: "+final_hadded_filename
         hadd_job(final_hadded_filename, all_ready, opt.OUTDIR+"/hadd/log/final.log", False)
+    if os.path.exists(final_hadded_filename):
+        if os.path.getsize(final_hadded_filename)>1024:
+            finished = True
 
 def get_input_count(opt, ana_arguments, jobindex):
     input_count = 0
@@ -813,7 +819,10 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
             print
         
         # Loop until batch task completion
-        while nfinished != njob:
+        finished = False
+        #while nfinished != njob:
+        while not finished:
+            cyclestarttime = time.time()
             # 1) Query the status of the already running batch jobs
             if opt.condor and len(cluster_ids)>0:
                 latest_condor_query = {}
@@ -1146,14 +1155,17 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
             
             # 4) Merge output files if all jobs in a sample are ready
             if not opt.nohadd:
-                merge_output(ana_arguments, last_known_status)
+                merge_output(ana_arguments, last_known_status, finished)
             
             # 5) Print batch status
             print "Analyzer jobs on batch (Done/All): "+str(nfinished)+"/"+str(njob)+"   \r",
             sys.stdout.flush()
             
-            # 6) Sleep 15 minutes between condor job check iterations
-            if opt.condor: time.sleep(900)
+            # 6) Sleep 10 minutes between condor job check iterations
+            if not finished and opt.condor:
+                cycletime = time.time()-cyclestarttime
+                if cycletime<600:
+                    time.sleep(int(600-cycletime))
         
     else:
         # Local analysis jobs

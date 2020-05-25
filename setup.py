@@ -61,9 +61,10 @@ bad_files = open("bad_files_found.txt", "w")
 
 # make a list of files already there
 counted_already = []
-with open("condor/filelist_and_counts.txt", 'r') as countsfile:
-    for line in countsfile:
-        counted_already.append(line.split()[0])
+if os.path.exists("condor/filelist_and_counts.txt"):
+    with open("condor/filelist_and_counts.txt", 'r') as countsfile:
+        for line in countsfile:
+            counted_already.append(line.split()[0])
 
 for flist in vf:
     countsfile = open("condor/filelist_and_counts.txt", 'a')
