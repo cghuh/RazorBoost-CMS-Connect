@@ -476,6 +476,7 @@ for i in range(0, len(ana_arguments)):
             condor_site = "US"
         elif "ufl.edu" in filename:
             condor_site = "US"
+    #condor_site = "US"
     ana_arguments[i].append(condor_site)
 
 # Recover info about previously submitted jobs
@@ -483,6 +484,7 @@ last_known_status = [-1] * len(ana_arguments) # -1: start, 0: finished, time(): 
 last_condor_jobid = [""] * len(ana_arguments)
 batch_number = 0
 cluster_ids = []
+found_jobs = []
 if opt.recover:
     if opt.batch:
         nrecov = 0
@@ -510,10 +512,14 @@ if opt.recover:
                                     for i in range(0, len(ana_arguments)):
                                         if input_tmp_filelist == ana_arguments[i][1][0].replace(EXEC_PATH+"/",""):
                                             jobindex = i
-                                    last_known_status[jobindex] = int(time.time())
-                                    last_condor_jobid[jobindex] = jobid
-                                    #print "- Found running HTCondor job: ID = "+jobid+" ("+input_tmp_filelist+", jobindex = "+str(jobindex)+")"
-                                    nrecov += 1
+                                    output_file = ana_arguments[jobindex][0]
+                                    if output_file not in found_jobs:
+                                        if not os.path.exists(output_file):
+                                            found_jobs.append(output_file)
+                                            last_known_status[jobindex] = int(time.time())
+                                            last_condor_jobid[jobindex] = jobid
+                                            nrecov += 1
+                                            #print "- Found running HTCondor job: ID = "+jobid+" ("+input_tmp_filelist+", jobindex = "+str(jobindex)+")"
                 os.remove(TMPDIR+'batchstatus_'+cluster_ids[-1]+'.txt')
         else:
             # Check if the submission time is available
@@ -552,7 +558,7 @@ def backup_files(backup_dir, creation_time, update):
         print "Backing up files in: "+backup_dir
         print
     if not os.path.exists(backup_dir): special_call(["mkdir", "-p", backup_dir], opt.run)
-    special_call(["cp", "-rp", "btag_eff", "../RazorBoost-CMS-Connect", "correction_factors", "data", "filelists", "filelists_tmp", "include", "pileup", "python", "scale_factors", "src", "systematics", "trigger_eff", "setup.sh"] + glob.glob("*.h") + glob.glob("*.cc") + glob.glob("*ratios.txt") + glob.glob("Makefile*") + [backup_dir+"/"], opt.run)
+    special_call(["cp", "-rp", "btag_eff", "../RazorBoost-CMS-Connect", "correction_factors", "data", "filelists", "filelists_tmp", "include", "pileup", "python", "scale_factors", "scripts", "src", "systematics", "trigger_eff", "setup.sh"] + glob.glob("*.h") + glob.glob("*.cc") + glob.glob("*ratios.txt") + glob.glob("Makefile*") + [backup_dir+"/"], opt.run)
     special_call(["mv", backup_dir+"/RazorBoost-CMS-Connect", backup_dir+"/condor"], opt.run)
     special_call(["rm", "-rf", backup_dir+"/condor/.git"], opt.run)
     if not opt.update:
@@ -654,7 +660,7 @@ def hadd_job(output, list, log, batch=True):
     else:
         logged_call(["hadd", "-f", "-v", output]+list, log, opt.run)
 
-def merge_output(ana_arguments, last_known_status, finished):
+def merge_output(ana_arguments, last_known_status):
     # Check list of files ready to be merged (with hadd)
     if not os.path.exists(opt.OUTDIR+"/hadd"): special_call(["mkdir", "-p", opt.OUTDIR+"/hadd"], opt.run, 0)
     prev_sample = ""
@@ -761,9 +767,6 @@ def merge_output(ana_arguments, last_known_status, finished):
     if len(all_ready) == len(alldir) and not os.path.exists(final_hadded_filename):
         print "All jobs are ready, merging all output files into: "+final_hadded_filename
         hadd_job(final_hadded_filename, all_ready, opt.OUTDIR+"/hadd/log/final.log", False)
-    if os.path.exists(final_hadded_filename):
-        if os.path.getsize(final_hadded_filename)>1024:
-            finished = True
 
 def get_input_count(opt, ana_arguments, jobindex):
     input_count = 0
@@ -932,6 +935,7 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
                                                     time_latest_event = 0
                                                     nevt = 0
                                                     nps = 0
+                                                    badfile = ""
                                                     with open(output_stdout) as stdout:
                                                         for line in stdout.readlines():
                                                             if line.startswith("UnixTime-JobStart:"):
@@ -955,6 +959,11 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
                                                                 time_latest_event = int(line.split()[-9])
                                                                 nevt = float(line.split()[-5])
                                                                 report_nps  = float(line.split()[-1])
+                                                            if "failed to read the file type data" in line and "cms-xrd-global.cern.ch" in line:
+                                                                badfile = line.split()[3]
+                                                    if badfile != "":
+                                                        print "Unaccessible file found:"
+                                                        print badfile
                                                     if time_job_start == 0:
                                                         print "UnixTime-JobStart not found in: "+output_stdout
                                                         sys.exit()
@@ -1155,13 +1164,19 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
             
             # 4) Merge output files if all jobs in a sample are ready
             if not opt.nohadd:
-                merge_output(ana_arguments, last_known_status, finished)
+                merge_output(ana_arguments, last_known_status)
             
             # 5) Print batch status
             print "Analyzer jobs on batch (Done/All): "+str(nfinished)+"/"+str(njob)+"   \r",
             sys.stdout.flush()
             
-            # 6) Sleep 10 minutes between condor job check iterations
+            # 6) Check if final output file is ready
+            final_hadded_filename = opt.OUTDIR+".root"
+            if os.path.exists(final_hadded_filename):
+                if os.path.getsize(final_hadded_filename)>1024:
+                    finished = True
+            
+            # 7) Sleep 10 minutes between condor job check iterations
             if not finished and opt.condor:
                 cycletime = time.time()-cyclestarttime
                 if cycletime<600:

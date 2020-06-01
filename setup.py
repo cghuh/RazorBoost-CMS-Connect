@@ -1,11 +1,55 @@
 import os, re, sys, glob, socket, subprocess, ROOT
 
+opt = "skim"
+if len(sys.argv)>1: opt = sys.argv[1]
+
 ANA_BASE = os.environ['CMSSW_BASE']+'/src/BoostAnalyzer17'
 if 'grid18.kfki.hu' in socket.gethostname(): ANA_BASE='/data/jkarancs/CMSSW/BoostAnalyzer17'
-vf = ["condor/filelist_unskim_2016.txt", "condor/filelist_unskim_2017.txt", "condor/filelist_unskim_2018.txt"]
-#vf = ["condor/filelist_2016.txt", "condor/filelist_2017.txt", "condor/filelist_2018.txt"]
+if opt == "unskim":
+    print "Unskimmed ntuples selected"
+    vf = ["condor/filelist_unskim_2016.txt", "condor/filelist_unskim_2017.txt", "condor/filelist_unskim_2018.txt"]
+else:
+    print "Skimmed ntuples selected"
+    vf = ["condor/filelist_2016.txt", "condor/filelist_2017.txt", "condor/filelist_2018.txt"]
 
-print "Creating file lists ... ",
+# private methods
+def grep(cmd, togrep):
+    results = []
+    for i in range(len(togrep)):
+        results.append([])
+    tmpfile = "/tmp/tmpcmd.txt"
+    if os.path.exists(tmpfile): os.remove(tmpfile)
+    with open(tmpfile, "w") as chk:
+        proc = subprocess.Popen(cmd, stdout=chk, stderr=chk, close_fds=True)
+        proc.wait()
+    proxyerror = False
+    with open(tmpfile, "r") as chk:
+        for line in chk:
+            for i in range(len(togrep)):
+                if togrep[i] in line:
+                    results[i].append(line.replace('\n',''))
+    os.remove(tmpfile)
+    return results
+
+# Fix issues with cases where the file cannot be read
+def open_file(filename):
+    fin = 0
+    if "root://cms-xrd-global.cern.ch/" in filename:
+        fin = ROOT.TFile.Open(filename)
+        if not fin:
+            lfn = filename.replace("root://cms-xrd-global.cern.ch/","")
+            servers = grep(["xrdfs", "cms-xrd-global.cern.ch", "locate", "-d", "-m", lfn], ["Server Read"])
+            for i in range(len(servers[0])):
+                server = servers[0][i].split()[0]
+                newfilename = filename.replace("cms-xrd-global.cern.ch", server)
+                fin = ROOT.TFile.Open(newfilename)
+                if fin:
+                    break
+    else:
+        fin = ROOT.TFile.Open(filename)
+    return fin
+
+print "Creating file lists ... "
 if not os.path.exists(ANA_BASE+'/filelists/2016/data'):        os.makedirs(ANA_BASE+'/filelists/2016/data')
 if not os.path.exists(ANA_BASE+'/filelists/2016/signals'):     os.makedirs(ANA_BASE+'/filelists/2016/signals')
 if not os.path.exists(ANA_BASE+'/filelists/2016/backgrounds'): os.makedirs(ANA_BASE+'/filelists/2016/backgrounds')
@@ -54,7 +98,7 @@ for flist in vf:
                 print>>fl, filename
 print 'Done.'
 
-print "Creating an input event number txt file ... ",
+print "Updating input event number txt file ... "
 bad_files = open("bad_files_found.txt", "w")
 #if os.path.exists("condor/filelist_and_counts.txt"):
 #    os.remove("condor/filelist_and_counts.txt")
@@ -66,30 +110,55 @@ if os.path.exists("condor/filelist_and_counts.txt"):
         for line in countsfile:
             counted_already.append(line.split()[0])
 
-for flist in vf:
-    countsfile = open("condor/filelist_and_counts.txt", 'a')
-    with open(flist) as filelist:
-        for line in filelist:
-            filename = line.split()[0]
-            if filename not in counted_already:
-                fin = ROOT.TFile.Open(filename)
-                if not fin:
-                    print filename+" is not a root file"
-                    print>>bad_files, filename+" bad file"
-                else:
-                    tree = fin.Get("Events")
-                    if tree:
-                        if tree.GetEntries()>0:
-                            print>>countsfile, filename+" "+str(tree.GetEntries())
-                        else:
-                            print filename+" has 0 entries"
-                            print>>bad_files, filename+" 0 entry"
+sites = {}
+with open("condor/filelist_and_counts.txt", 'a') as countsfile:
+    for flist in vf:
+        with open(flist) as filelist:
+            for line in filelist:
+                filename = line.split()[0]
+                if filename not in counted_already:
+                    fin = open_file(filename)
+                    if not fin:
+                        print filename+" could not open"
+                        print>>bad_files, filename+" bad file"
                     else:
-                            print filename+" has no tree"
-                            print>>bad_files, filename+" no tree"
+                        tree = fin.Get("Events")
+                        if tree:
+                            if tree.GetEntries()>0:
+                                # Check if the dataset is hosted in US sites
+                                site =  "EU"
+                                if "fnal.gov" in filename:
+                                    condor_site = "US"
+                                elif "wisc.edu" in filename:
+                                    condor_site = "US"
+                                elif "ufl.edu" in filename:
+                                    condor_site = "US"
+                                elif "cms-xrd-global.cern.ch" in filename:
+                                    # NANOAOD, so need to check in DAS
+                                    lfn = filename.replace("root://cms-xrd-global.cern.ch/","")
+                                    dataset = "/".join(lfn.split("/")[:-2])
+                                    if dataset in sites:
+                                        site = sites[dataset]
+                                    else:
+                                        dascheck = grep(["dasgoclient", "--query", "site file="+lfn], ["X509_USER", "T2_US"])
+                                        if len(dascheck[0]):
+                                            print
+                                            print "ERROR! - proxy not found, please restart script after issuing this command:"
+                                            print "voms-proxy-init -voms cms -rfc"
+                                            sys.exit()
+                                        if len(dascheck[1]):
+                                            site = "US"
+                                        sites[dataset] = site
+                                print>>countsfile, filename+" "+str(tree.GetEntries())+" "+site
+                                #print filename+" "+str(tree.GetEntries())+" "+site
+                            else:
+                                print filename+" has 0 entries"
+                                print>>bad_files, filename+" 0 entry"
+                        else:
+                                print filename+" has no tree"
+                                print>>bad_files, filename+" no tree"
 
-
-print "Creating temp file list directories (for batch and split jobs) ... ",
+print "Creating temp file list directories (for batch and split jobs) ... "
 if not os.path.exists(ANA_BASE+'/filelists_tmp/2016/data'):        os.makedirs(ANA_BASE+'/filelists_tmp/2016/data')
 if not os.path.exists(ANA_BASE+'/filelists_tmp/2016/signals'):     os.makedirs(ANA_BASE+'/filelists_tmp/2016/signals')
 if not os.path.exists(ANA_BASE+'/filelists_tmp/2016/backgrounds'): os.makedirs(ANA_BASE+'/filelists_tmp/2016/backgrounds')

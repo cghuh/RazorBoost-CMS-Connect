@@ -5,6 +5,7 @@ arch=slc6_amd64_gcc700
 rel=CMSSW_10_2_16
 sandbox=$(ls sandbox*.tar.bz2)
 arguments=${@:1}
+filelist=$1
 cwd=$(pwd)
 
 echo -e "------------------- START --------------------"
@@ -36,11 +37,16 @@ eval `scramv1 runtime -sh`
 echo -e "\n[6] source setup.sh"
 source setup.sh
 
+echo -e "\n--------------- Filelist check ---------------"
+
+echo -e "\n[7] python scripts/check_filelist.py $filelist"
+python scripts/check_filelist.py $filelist
+
 echo -e "\n------------------ Analyzer ------------------"
 
 echo   "UnixTime-AnalyzerStart: "$(date +%s)
 
-echo -e "\n[7] time ./Analyzer $cwd/output.root $arguments 2>&1"
+echo -e "\n[8] time ./Analyzer $cwd/output.root $arguments 2>&1"
 time ./Analyzer $cwd/output.root $arguments 2>&1
 
 
@@ -48,20 +54,20 @@ echo   "UnixTime-AnalyzerEnd: "$(date +%s)
 
 echo -e "\n------------------ Cleanup -------------------"
 
-echo -e "\n[8] cd -"
+echo -e "\n[9] cd -"
 cd -
 
-echo -e "\n[9] rm -r $rel"
+echo -e "\n[10] rm -r $rel"
 rm -r $rel
 
-echo -e "\n[10] ls -ltr"
+echo -e "\n[11] ls -ltr"
 ls -ltr
 
 # delete output file if too small
 # This prevents late, parallel and failing condor jobs overwriting the otherwise good output
 if [ -f output.root ]; then 
     if [ $(ls -l output.root | awk '{ print $5 }' ) -lt 1000 ]; then 
-        echo -e "\n[11] rm output.root"
+        echo -e "\n[12] rm output.root"
         rm output.root
     fi
 fi
