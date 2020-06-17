@@ -245,6 +245,19 @@ def get_optim_ratios(opt, samplename):
         optim_ratios[samplename] = optim
         return optim
 
+# get filelist counts and site infos
+# determined by condor/setup.py script
+counts = {}
+sites = {}
+
+
+countfileloc = "condor/filelist_and_counts.txt"
+if opt.recover: countfileloc = EXEC_PATH+"/condor/filelist_and_counts.txt"
+with open(countfileloc) as counts_file:
+    for line in counts_file.readlines():
+        counts[line.split()[0]] = int(line.split()[1])
+        sites[line.split()[0]]  = line.split()[2]
+
 # Loop over all filelists
 for filelist in input_filelists:
     # Options for Analyzer
@@ -322,12 +335,9 @@ for filelist in input_filelists:
             curr_max_nevt = 0
             for i in range(0, len(files)):
                 # First get the number of events in the file from txt file created by condor/setup.py
-                nevt = 0
-                with open("condor/filelist_and_counts.txt") as counts_file:
-                    for line in counts_file.readlines():
-                        if line.split()[0] == files[i]:
-                            nevt = int(line.split()[1])
-                if nevt == 0:
+                if files[i] in counts:
+                    nevt = counts[files[i]]
+                else:
                     print "ERROR: File not found in condor/filelist_and_counts.txt"
                     print files[i]
                     sys.exit()
@@ -462,21 +472,14 @@ if not opt.useprev and (opt.NEVT != -1 or opt.optim):
 print "Number of jobs: "+str(len(ana_arguments))
 
 # Determine the sites to run the job for condor
-# Check if the input file is in the US and set the site there if needed
+# Check if the input file is in the EU/US and set the site there if needed
 for i in range(0, len(ana_arguments)):
-    condor_site = "EU"
     tmp_filelist = ana_arguments[i][1][0]
     if not opt.useprev and not opt.recover:
         tmp_filelist = tmp_filelist.replace(EXEC_PATH+"/","")
     with open(tmp_filelist) as job_filelist:
         filename = job_filelist.read().splitlines()[0]
-        if "fnal.gov" in filename:
-            condor_site = "US"
-        elif "wisc.edu" in filename:
-            condor_site = "US"
-        elif "ufl.edu" in filename:
-            condor_site = "US"
-    #condor_site = "US"
+        condor_site = sites[filename]
     ana_arguments[i].append(condor_site)
 
 # Recover info about previously submitted jobs
@@ -558,7 +561,7 @@ def backup_files(backup_dir, creation_time, update):
         print "Backing up files in: "+backup_dir
         print
     if not os.path.exists(backup_dir): special_call(["mkdir", "-p", backup_dir], opt.run)
-    special_call(["cp", "-rp", "btag_eff", "../RazorBoost-CMS-Connect", "correction_factors", "data", "filelists", "filelists_tmp", "include", "pileup", "python", "scale_factors", "scripts", "src", "systematics", "trigger_eff", "setup.sh"] + glob.glob("*.h") + glob.glob("*.cc") + glob.glob("*ratios.txt") + glob.glob("Makefile*") + [backup_dir+"/"], opt.run)
+    special_call(["cp", "-rpL", "btag_eff", "../RazorBoost-CMS-Connect", "correction_factors", "data", "filelists", "filelists_tmp", "include", "pileup", "python", "scale_factors", "scripts", "src", "systematics", "trigger_eff", "setup.sh"] + glob.glob("*.h") + glob.glob("*.cc") + glob.glob("*ratios.txt") + glob.glob("Makefile*") + [backup_dir+"/"], opt.run)
     special_call(["mv", backup_dir+"/RazorBoost-CMS-Connect", backup_dir+"/condor"], opt.run)
     special_call(["rm", "-rf", backup_dir+"/condor/.git"], opt.run)
     if not opt.update:
@@ -691,6 +694,12 @@ def merge_output(ana_arguments, last_known_status):
         output   = all_mergeables[i][0]
         log      = output.rsplit("/",1)[0]+"/log/"+output.rsplit("/",1)[1].replace(".root",".log")
         allinput = all_mergeables[i][1:]
+        mergeonbatch = True
+        if os.path.exists(output):
+            if os.path.getsize(output)==1024 and (time.time()-os.path.getmtime(output))>3600:
+                print "Redo failed merging (locally) for "+output
+                os.remove(output)
+                mergeonbatch = False
         if not os.path.exists(output):
             if len(allinput)==1:
                 # Single files can simply be copied
@@ -699,45 +708,52 @@ def merge_output(ana_arguments, last_known_status):
             else:
                 # Multiple files will be hadded
                 print str(len(allinput))+" files for "+output+" are ready to be merged"
-                if not os.path.exists(output):
-                    #logged_call(["hadd", "-f", "-v", "-n", "200"]+all_mergeables[i], all_mergeables[i][0].rsplit("/",1)[0]+"/log/"+all_mergeables[i][0].rsplit("/",1)[1].replace(".root",".log"), opt.run)
-                    # hadd produces problems when merging too many files
-                    # so we merge files in chunks of maximum 100 files each
-                    # problems happen typically over a few hundred input files
-                    Nmerge = 100
-                    alltmp = []
-                    if len(allinput)<Nmerge:
-                        # Simple hadding all output files
-                        hadd_job(output, allinput, log)
-                    else:
-                        # Two staged hadding:
-                        # - First merge every Nmerge files to temp files
-                        for n in range(1, (len(allinput)-1)/Nmerge+2):
-                            tmpoutput = output.replace(".root","_"+str(n)+".root")
-                            if os.path.isfile(tmpoutput):
-                                if os.path.getsize(tmpoutput)>1024:
-                                    alltmp.append(tmpoutput)
-                            else:
+                #logged_call(["hadd", "-f", "-v", "-n", "200"]+all_mergeables[i], all_mergeables[i][0].rsplit("/",1)[0]+"/log/"+all_mergeables[i][0].rsplit("/",1)[1].replace(".root",".log"), opt.run)
+                # hadd produces problems when merging too many files
+                # so we merge files in chunks of maximum 100 files each
+                # problems happen typically over a few hundred input files
+                Nmerge = 100
+                alltmp = []
+                if len(allinput)<Nmerge:
+                    # Simple hadding all output files
+                    hadd_job(output, allinput, log, mergeonbatch)
+                else:
+                    # Two staged hadding:
+                    # - First merge every Nmerge files to temp files
+                    for n in range(1, (len(allinput)-1)/Nmerge+2):
+                        tmpoutput = output.replace(".root","_"+str(n)+".root")
+                        if os.path.isfile(tmpoutput):
+                            if os.path.getsize(tmpoutput)>1024:
+                                alltmp.append(tmpoutput)
+                            elif os.path.getsize(tmpoutput)==1024 and (time.time()-os.path.getmtime(tmpoutput))>3600:
                                 tmplist = []
                                 for i in range((n-1)*Nmerge, min(n*Nmerge,len(allinput))): tmplist.append(allinput[i])
-                                tmplog    = tmpoutput.rsplit("/",1)[0]+"/log/"+tmpoutput.rsplit("/",1)[1].replace(".root",".log")
-                                print "- Merging into temp file: "+tmpoutput
-                                hadd_job(tmpoutput, tmplist, tmplog)
-                        # - then merge the resulting temp files into a single file
-                        #   and remove the temporary files
-                        if len(alltmp) == (len(allinput)-1)/Nmerge+1:
-                            print "- Merging temp files into: "+output
-                            hadd_job(output, alltmp, log)
-                            for tmpfile in alltmp:
-                                #if os.path.isfile(tmpfile):
-                                #    os.remove(tmpfile)
-                                #else:
-                                if not os.path.isfile(tmpfile):
-                                    print "Something went wrong with the hadding of tmp file: "+tmpfile
-                                    sys.exit()
-                    #  Check that the result has the right size (if not, delete)
-                    if os.path.isfile(output):
-                        if os.path.getsize(output) < 1000: os.remove(output)
+                                tmplog = tmpoutput.rsplit("/",1)[0]+"/log/"+tmpoutput.rsplit("/",1)[1].replace(".root",".log")
+                                print "- Merging into temp file (again, locally): "+tmpoutput
+                                hadd_job(tmpoutput, tmplist, tmplog, False)
+                                if os.path.getsize(tmpoutput)>1024:
+                                    alltmp.append(tmpoutput)
+                        else:
+                            tmplist = []
+                            for i in range((n-1)*Nmerge, min(n*Nmerge,len(allinput))): tmplist.append(allinput[i])
+                            tmplog    = tmpoutput.rsplit("/",1)[0]+"/log/"+tmpoutput.rsplit("/",1)[1].replace(".root",".log")
+                            print "- Merging into temp file: "+tmpoutput
+                            hadd_job(tmpoutput, tmplist, tmplog, mergeonbatch)
+                    # - then merge the resulting temp files into a single file
+                    #   and remove the temporary files
+                    if len(alltmp) == (len(allinput)-1)/Nmerge+1:
+                        print "- Merging temp files into: "+output
+                        hadd_job(output, alltmp, log, mergeonbatch)
+                        for tmpfile in alltmp:
+                            #if os.path.isfile(tmpfile):
+                            #    os.remove(tmpfile)
+                            #else:
+                            if not os.path.isfile(tmpfile):
+                                print "Something went wrong with the hadding of tmp file: "+tmpfile
+                                sys.exit()
+                #  Check that the result has the right size (if not, delete)
+                if os.path.isfile(output):
+                    if os.path.getsize(output) < 1000: os.remove(output)
     # Do partial merging when a year and data type is ready
     all_ready = []
     saved_path = os.getcwd()
@@ -749,6 +765,15 @@ def merge_output(ana_arguments, last_known_status):
         if os.path.exists(haddoutfile):
             if os.path.getsize(haddoutfile)>1024:
                 all_ready.append(haddoutfile)
+            elif os.path.getsize(haddoutfile)==1024 and (time.time()-os.path.getmtime(haddoutfile))>3600:
+                ready = []
+                for item in sorted(glob.glob(EXEC_PATH+"/"+listdir+"/*.txt")):
+                    hadded = item.replace("BoostAnalyzer17/filelists/","hadd/").replace("/data/","_").replace("/signals/","_").replace("/backgrounds/","_").replace(".txt",".root")
+                    if os.path.exists(hadded):
+                        if os.path.getsize(hadded)>1024:
+                            ready.append(hadded)
+                # The batch job probably failed, so redo it locally
+                hadd_job(haddoutfile, ready, haddoutfile.replace("hadd","hadd/log").replace(".root",".log"), False)
         else:
             #print allitem
             ready = []
@@ -764,9 +789,15 @@ def merge_output(ana_arguments, last_known_status):
                     hadd_job(haddoutfile, ready, haddoutfile.replace("hadd","hadd/log").replace(".root",".log"))
     # And finally merge all partial output files to a single final output file
     final_hadded_filename = opt.OUTDIR+".root"
-    if len(all_ready) == len(alldir) and not os.path.exists(final_hadded_filename):
-        print "All jobs are ready, merging all output files into: "+final_hadded_filename
-        hadd_job(final_hadded_filename, all_ready, opt.OUTDIR+"/hadd/log/final.log", False)
+    if len(all_ready) == len(alldir):
+        if os.path.exists(final_hadded_filename):
+            if os.path.getsize(final_hadded_filename)<1024:
+                os.remove(final_hadded_filename)
+                print "All jobs are ready, merging (again) all output files into: "+final_hadded_filename
+                hadd_job(final_hadded_filename, all_ready, opt.OUTDIR+"/hadd/log/final.log", False)
+        else:
+            print "All jobs are ready, merging all output files into: "+final_hadded_filename
+            hadd_job(final_hadded_filename, all_ready, opt.OUTDIR+"/hadd/log/final.log", False)
 
 def get_input_count(opt, ana_arguments, jobindex):
     input_count = 0
@@ -779,10 +810,6 @@ def get_input_count(opt, ana_arguments, jobindex):
                 ilast = int(float(job_option.replace("ilast=","")))
         input_count = ilast - ifirst
     else:
-        counts = {}
-        with open(EXEC_PATH+"/condor/filelist_and_counts.txt") as counts_file:
-            for line in counts_file.readlines():
-                counts[line.split()[0]] = int(line.split()[1])
         tmp_filelist  = ana_arguments[jobindex][1][0]
         with open(tmp_filelist) as f:
             files = f.read().splitlines()
@@ -909,7 +936,7 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
                                             samplename = year+"_"+("_".join(tmp_filelist.split("/")[-1].split("_")[:-1]))
                                             optim      = get_optim_ratios(opt, samplename)
                                             target_time = 7200
-                                            maxratio = 10.0 # Maximum allowed ratio of target nps to actual nps
+                                            maxratio = 6.0 # Maximum allowed ratio of target nps to actual nps
                                             target_nps = opt.NEVT * optim / target_time
                                             max_possible_nps = get_input_count(opt, ana_arguments, jobindex) / (time.time()-starttime)
                                             runtime = int(time.time()) - starttime
