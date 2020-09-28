@@ -502,7 +502,7 @@ if opt.recover:
                             cluster_ids.append(clusterid)
             if len(cluster_ids):
                 print "Recovering jobs from cluster ids: "+(" ".join(cluster_ids))
-                logged_call(shlex.split('condor_q -w '+(" ".join(cluster_ids))), TMPDIR+'batchstatus_'+cluster_ids[-1]+'.txt', 1)
+                logged_call(shlex.split('condor_q -w --nobatch '+(" ".join(cluster_ids))), TMPDIR+'batchstatus_'+cluster_ids[-1]+'.txt', 1)
                 with open(TMPDIR+'batchstatus_'+clusterid+'.txt') as batchstatus:
                     lines = batchstatus.readlines()
                     for line in lines:
@@ -858,7 +858,7 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
                 latest_condor_query = {}
                 latest_batch_status = TMPDIR+'batchstatus_'+cluster_ids[-1]+'.txt'
                 logged_call(shlex.split(
-                    'condor_q '+(" ".join(cluster_ids))+
+                    'condor_q --nobatch '+(" ".join(cluster_ids))+
                     ' -format "%s " GlobalJobId'+
                     ' -format "%s " JobStatus'+
                     ' -format "%d " JobCurrentStartExecutingDate'+
