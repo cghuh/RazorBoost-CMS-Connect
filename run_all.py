@@ -590,10 +590,10 @@ def compile(Ana = 1, Plotter = 1):
 def create_sandbox(backup_dir, update):
     print "Creating sandbox for condor"
     print
-    sandbox = os.path.split(backup_dir)[0]+"/sandbox-BoostAnalyzer17.tar.bz2"
+    sandbox = os.path.split(backup_dir)[0]+"/sandbox-BoostAnalyzer17.tar"
     if update:
         special_call(["rm", sandbox], opt.run)
-    special_call(["tar", "-cjf", sandbox, "-C", os.path.split(backup_dir)[0], "BoostAnalyzer17"], opt.run)
+    special_call(["tar", "-cf", sandbox, "-C", os.path.split(backup_dir)[0], "BoostAnalyzer17"], opt.run)
     print
 
 # Run a single Analyzer instance (on a single input list, i.e. one dataset)
@@ -694,7 +694,7 @@ def merge_output(ana_arguments, last_known_status):
         output   = all_mergeables[i][0]
         log      = output.rsplit("/",1)[0]+"/log/"+output.rsplit("/",1)[1].replace(".root",".log")
         allinput = all_mergeables[i][1:]
-        mergeonbatch = True
+        mergeonbatch = False
         if os.path.exists(output):
             if os.path.getsize(output)==1024 and (time.time()-os.path.getmtime(output))>3600:
                 print "Redo failed merging (locally) for "+output
@@ -1169,7 +1169,7 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
                         clusterid = ""
                         latest_log_file = opt.OUTDIR+"/log/condor_task_"+str(batch_number)+".log"
                         submittime = int(time.time())
-                        logged_call(["condor/submit_condor_task.sh", site, opt.OUTDIR+"/sandbox-BoostAnalyzer17.tar.bz2", joblist_to_submit], latest_log_file, opt.run)
+                        logged_call(["condor/submit_condor_task.sh", site, opt.OUTDIR+"/sandbox-BoostAnalyzer17.tar", joblist_to_submit], latest_log_file, opt.run)
                         with open(latest_log_file) as latest_log:
                             for line in latest_log.readlines():
                                 if "submitted to cluster" in line:

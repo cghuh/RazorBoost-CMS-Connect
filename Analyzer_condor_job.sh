@@ -2,8 +2,8 @@
 echo   "UnixTime-JobStart: "$(date +%s)
 
 arch=slc6_amd64_gcc700
-rel=CMSSW_10_2_16
-sandbox=$(ls sandbox*.tar.bz2)
+rel=CMSSW_10_2_16_UL
+sandbox=$(ls sandbox*.tar)
 arguments=${@:1}
 filelist=$1
 cwd=$(pwd)
@@ -25,8 +25,8 @@ export SCRAM_ARCH=$arch
 echo -e "\n[2] scramv1 project CMSSW $rel"
 scramv1 project CMSSW $rel
 
-echo -e "\n[3] tar -xjf $sandbox -C $rel/src/"
-tar -xjf $sandbox -C $rel/src/
+echo -e "\n[3] tar -xf $sandbox -C $rel/src/"
+tar -xf $sandbox -C $rel/src/
 
 echo -e "\n[4] cd $rel/src/BoostAnalyzer17"
 cd $rel/src/BoostAnalyzer17
