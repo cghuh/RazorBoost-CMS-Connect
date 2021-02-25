@@ -5442,6 +5442,7 @@ root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v7/2
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v7/2017/signals/SMS-T5ttcc_mGluino1750to2800_TuneCP2_13TeV-madgraphMLM-pythia8/F0E3B894-3783-554A-90C6-4530D34E597F.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v7/2017/signals/SMS-T5ttcc_mGluino1750to2800_TuneCP2_13TeV-madgraphMLM-pythia8/F3BB7884-D639-1541-83A8-E9EED8419959.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v7/2017/signals/SMS-T5ttcc_mGluino1750to2800_TuneCP2_13TeV-madgraphMLM-pythia8/F8567361-8E31-0543-BD17-45C897FE0BF8.root
+root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v7/2017/signals/SMS-T6qqWZ/SMS-T6qqWZ.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v7/2017/signals/SMS-TChiHH_HToBB_HToBB_TuneCP2_13TeV-madgraphMLM-pythia8/05593D87-DEEE-C140-9993-3BCF4066A185.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v7/2017/signals/SMS-TChiHH_HToBB_HToBB_TuneCP2_13TeV-madgraphMLM-pythia8/37A93AC9-095E-1E4E-8685-AA96A286F3AF.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v7/2017/signals/SMS-TChiHH_HToBB_HToBB_TuneCP2_13TeV-madgraphMLM-pythia8/3FB4C531-F508-AF47-9F74-200AF30C2162.root
