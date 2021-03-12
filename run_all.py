@@ -936,7 +936,7 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
                                             samplename = year+"_"+("_".join(tmp_filelist.split("/")[-1].split("_")[:-1]))
                                             optim      = get_optim_ratios(opt, samplename)
                                             target_time = 7200
-                                            maxratio = 6.0 # Maximum allowed ratio of target nps to actual nps
+                                            maxratio = 10.0 # Maximum allowed ratio of target nps to actual nps
                                             target_nps = opt.NEVT * optim / target_time
                                             max_possible_nps = get_input_count(opt, ana_arguments, jobindex) / (time.time()-starttime)
                                             runtime = int(time.time()) - starttime
@@ -960,6 +960,7 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
                                                     time_ana_start    = 0
                                                     time_first_event  = 0
                                                     time_latest_event = 0
+                                                    report_nps        = 0
                                                     nevt = 0
                                                     nps = 0
                                                     badfile = ""
@@ -1019,7 +1020,9 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
                                                         # The target average Nevt/s is known from previous runs
                                                         # The current read speed should not fall greatly below that
                                                         if time_latest_event > 0:
-                                                            if time_first_event > 0:
+                                                            if report_nps > 0:
+                                                                nps = report_nps
+                                                            elif time_first_event > 0:
                                                                 nps = nevt / (time.time() - time_first_event)
                                                             else:
                                                                 nps = nevt / (time.time() - starttime)
