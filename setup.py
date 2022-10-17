@@ -1,16 +1,17 @@
 import os, re, sys, glob, socket, subprocess, ROOT
 
 opt = "skim"
+#opt = "unskim"
 if len(sys.argv)>1: opt = sys.argv[1]
 
 ANA_BASE = os.environ['CMSSW_BASE']+'/src/BoostAnalyzer17'
 if 'grid18.kfki.hu' in socket.gethostname(): ANA_BASE='/data/jkarancs/CMSSW/BoostAnalyzer17'
 if opt == "unskim":
     print "Unskimmed ntuples selected"
-    vf = ["condor/filelist_unskim_2016.txt", "condor/filelist_unskim_2017.txt", "condor/filelist_unskim_2018.txt"]
+    vf = ["condor/filelist_unskim_2016.txt", "condor/filelist_unskim_2016APV.txt", "condor/filelist_unskim_2017.txt", "condor/filelist_unskim_2018.txt"]
 else:
     print "Skimmed ntuples selected"
-    vf = ["condor/filelist_2016.txt", "condor/filelist_2017.txt", "condor/filelist_2018.txt"]
+    vf = ["condor/filelist_2016.txt", "condor/filelist_2016APV.txt", "condor/filelist_2017.txt", "condor/filelist_2018.txt"]
 
 # private methods
 def grep(cmd, togrep):
@@ -53,6 +54,9 @@ print "Creating file lists ... "
 if not os.path.exists(ANA_BASE+'/filelists/2016/data'):        os.makedirs(ANA_BASE+'/filelists/2016/data')
 if not os.path.exists(ANA_BASE+'/filelists/2016/signals'):     os.makedirs(ANA_BASE+'/filelists/2016/signals')
 if not os.path.exists(ANA_BASE+'/filelists/2016/backgrounds'): os.makedirs(ANA_BASE+'/filelists/2016/backgrounds')
+if not os.path.exists(ANA_BASE+'/filelists/2016APV/data'):        os.makedirs(ANA_BASE+'/filelists/2016APV/data')
+if not os.path.exists(ANA_BASE+'/filelists/2016APV/signals'):     os.makedirs(ANA_BASE+'/filelists/2016APV/signals')
+if not os.path.exists(ANA_BASE+'/filelists/2016APV/backgrounds'): os.makedirs(ANA_BASE+'/filelists/2016APV/backgrounds')
 if not os.path.exists(ANA_BASE+'/filelists/2017/data'):        os.makedirs(ANA_BASE+'/filelists/2017/data')
 if not os.path.exists(ANA_BASE+'/filelists/2017/signals'):     os.makedirs(ANA_BASE+'/filelists/2017/signals')
 if not os.path.exists(ANA_BASE+'/filelists/2017/backgrounds'): os.makedirs(ANA_BASE+'/filelists/2017/backgrounds')
@@ -69,6 +73,8 @@ for flist in vf:
         year = '2017'
     elif '2018' in flist:
         year = '2018'
+    elif 'APV' in flist:
+        year = '2016APV'
     with open(flist) as filelist:
         for line in filelist:
             filename = line.split()[0]
@@ -89,7 +95,7 @@ for flist in vf:
                 fl = open(ANA_BASE+'/filelists/'+year+'/data/'+sample+'.txt', 'a')
                 print>>fl, filename
             # Signals
-            elif re.compile('.*T[1-9][t,b,c,q,W,Z,H][t,b,c,q,W,Z,H].*').match(sample) or "TChi" in sample:
+            elif re.compile('.*T[1-9][t,b,c,q,W,Z,H][t,b,c,q,W,Z,H].*').match(sample) or "TChi" in sample or "RPV" in sample:
                 fl = open(ANA_BASE+'/filelists/'+year+'/signals/'+sample+'.txt', 'a')
                 print>>fl, filename
             # Backgrounds
@@ -162,6 +168,9 @@ print "Creating temp file list directories (for batch and split jobs) ... "
 if not os.path.exists(ANA_BASE+'/filelists_tmp/2016/data'):        os.makedirs(ANA_BASE+'/filelists_tmp/2016/data')
 if not os.path.exists(ANA_BASE+'/filelists_tmp/2016/signals'):     os.makedirs(ANA_BASE+'/filelists_tmp/2016/signals')
 if not os.path.exists(ANA_BASE+'/filelists_tmp/2016/backgrounds'): os.makedirs(ANA_BASE+'/filelists_tmp/2016/backgrounds')
+if not os.path.exists(ANA_BASE+'/filelists_tmp/2016APV/data'):        os.makedirs(ANA_BASE+'/filelists_tmp/2016APV/data')
+if not os.path.exists(ANA_BASE+'/filelists_tmp/2016APV/signals'):     os.makedirs(ANA_BASE+'/filelists_tmp/2016APV/signals')
+if not os.path.exists(ANA_BASE+'/filelists_tmp/2016APV/backgrounds'): os.makedirs(ANA_BASE+'/filelists_tmp/2016APV/backgrounds')
 if not os.path.exists(ANA_BASE+'/filelists_tmp/2017/data'):        os.makedirs(ANA_BASE+'/filelists_tmp/2017/data')
 if not os.path.exists(ANA_BASE+'/filelists_tmp/2017/signals'):     os.makedirs(ANA_BASE+'/filelists_tmp/2017/signals')
 if not os.path.exists(ANA_BASE+'/filelists_tmp/2017/backgrounds'): os.makedirs(ANA_BASE+'/filelists_tmp/2017/backgrounds')

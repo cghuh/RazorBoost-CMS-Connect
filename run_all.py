@@ -170,7 +170,7 @@ else:
 # Read some options from included settings_*.h file
 with open("Analyzer.cc") as ana:
     for line in ana:
-        if '#include "settings_' in line:
+        if '#include "settings' in line:
             settings_file = line.split()[1].replace('"','')
 vary_syst = False
 with open(settings_file) as settings:
@@ -271,6 +271,8 @@ for filelist in input_filelists:
         year = "2017"
     elif "/2018/" in filelist:
         year = "2018"
+    elif "/2016APV/" in filelist:
+        year = "2016APV"
     options.append("year="+year)
     
     # Will put all files into the OUTDIR and its subdirectories
@@ -659,7 +661,8 @@ def analyzer_job((jobindex)):
 def hadd_job(output, list, log, batch=True):
     if batch:
         special_call(["truncate", "-s", "1K", output], opt.run, 0)
-        logged_call(["condor/submit_condor_task.sh", "hadd", ",".join(list), output, log.replace(".log","")], log.replace(".log","_condor.log"), opt.run)
+        #logged_call(["condor/submit_condor_task.sh", "hadd", ",".join(list), output, log.replace(".log","")], log.replace(".log","_condor.log"), opt.run)
+        logged_call(["hadd", "-f", "-v", output]+list, log, opt.run)
     else:
         logged_call(["hadd", "-f", "-v", output]+list, log, opt.run)
 
@@ -761,7 +764,7 @@ def merge_output(ana_arguments, last_known_status):
     alldir = sorted(glob.glob("filelists/*/*"))
     os.chdir(saved_path)
     for listdir in alldir:
-        haddoutfile = (EXEC_PATH+"/"+listdir).replace("BoostAnalyzer17/filelists","hadd").replace("2016/","2016_").replace("2017/","2017_").replace("2018/","2018_")+".root"
+        haddoutfile = (EXEC_PATH+"/"+listdir).replace("BoostAnalyzer17/filelists","hadd").replace("2016/","2016_").replace("2017/","2017_").replace("2018/","2018_").replace("2016APV/","2016APV_")+".root"
         if os.path.exists(haddoutfile):
             if os.path.getsize(haddoutfile)>1024:
                 all_ready.append(haddoutfile)
@@ -933,6 +936,8 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
                                                 year = "2017"
                                             elif "/2018/" in tmp_filelist:
                                                 year = "2018"
+                                            elif "/2016APV/" in tmp_filelist:
+                                                year = "2016APV"
                                             samplename = year+"_"+("_".join(tmp_filelist.split("/")[-1].split("_")[:-1]))
                                             optim      = get_optim_ratios(opt, samplename)
                                             target_time = 7200
@@ -994,7 +999,8 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
                                                         print badfile
                                                     if time_job_start == 0:
                                                         print "UnixTime-JobStart not found in: "+output_stdout
-                                                        sys.exit()
+                                                        special_call(["rm", "-rf", output_stdout], opt.run)
+                                                        #sys.exit()
                                                     else:
                                                         jobruntime =  int(time.time()) - time_job_start
                                                     if jobruntime <= target_time/4.0:
