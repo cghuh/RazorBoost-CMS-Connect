@@ -444,6 +444,10 @@ root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8/78C50990-B235-DC42-B6FC-F6730B1D2621.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8/C0C3DBBD-D06A-DC47-A4FA-597D6416D039.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8/E63D042E-62A3-2146-825F-5CAF5ACC2F88.root
+root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/11E3E21A-A701-F345-B1BE-A9785A2B6620.root
+root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/59024C1A-F2AD-8143-A52B-A3A600990479.root
+root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/7E6793A3-7669-5A40-A602-6354A021E26C.root
+root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/B77FC1B6-A20A-5344-A0EC-59D15C8B3155.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraph-pythia8/01C0CF14-DE77-DF48-8727-44350589B768.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraph-pythia8/0E459E78-3787-9D46-B969-B52DB5512DDB.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraph-pythia8/0F811E5D-50F6-C641-BC03-9BE2574CC541.root
@@ -517,7 +521,6 @@ root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraph-pythia8/EB966691-E828-7941-A62C-9CF7F06B764A.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraph-pythia8/ECD6118B-DE5E-BD41-A05A-BF8999D41EBD.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraph-pythia8/F4A52EBD-0FCE-3C47-A5BC-1D4480E507D9.root
-root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/006BE6AA-F0EF-BB48-9EAB-952E45238106.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/05680676-8CF7-5941-BC4D-00494A48392B.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/0A8E4A3A-A5B5-D94D-B622-3C4D8349C671.root
 root://eoscms.cern.ch//eos/cms/store/group/phys_susy/razor/RazorBoostNtuple/v9/2016/backgrounds/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/0DCC4261-6CE8-AE49-B1BD-19BF506D8B80.root
