@@ -784,7 +784,7 @@ def merge_output(ana_arguments, last_known_status):
             for item in allitem:
                 hadded = item.replace("BoostAnalyzer17/filelists/","hadd/").replace("/data/","_").replace("/signals/","_").replace("/backgrounds/","_").replace(".txt",".root")
                 if os.path.exists(hadded):
-                    if os.path.getsize(hadded)>1024:
+                    if os.path.getsize(hadded)>1024 or "2016APV_signals" in hadded:
                         ready.append(hadded)
             if len(ready) == len(allitem):
                 if not os.path.exists(haddoutfile):
@@ -1215,8 +1215,8 @@ def analysis(ana_arguments, last_known_status, last_condor_jobid, nproc):
             # 7) Sleep 10 minutes between condor job check iterations
             if not finished and opt.condor:
                 cycletime = time.time()-cyclestarttime
-                if cycletime<600:
-                    time.sleep(int(600-cycletime))
+                if cycletime<300:
+                    time.sleep(int(300-cycletime))
         
     else:
         # Local analysis jobs
