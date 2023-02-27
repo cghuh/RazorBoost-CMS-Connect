@@ -784,7 +784,7 @@ def merge_output(ana_arguments, last_known_status):
             for item in allitem:
                 hadded = item.replace("BoostAnalyzer17/filelists/","hadd/").replace("/data/","_").replace("/signals/","_").replace("/backgrounds/","_").replace(".txt",".root")
                 if os.path.exists(hadded):
-                    if os.path.getsize(hadded)>1024 or "2016APV_signals" in hadded:
+                    if os.path.getsize(hadded)>1024:
                         ready.append(hadded)
             if len(ready) == len(allitem):
                 if not os.path.exists(haddoutfile):
@@ -792,7 +792,7 @@ def merge_output(ana_arguments, last_known_status):
                     hadd_job(haddoutfile, ready, haddoutfile.replace("hadd","hadd/log").replace(".root",".log"))
     # And finally merge all partial output files to a single final output file
     final_hadded_filename = opt.OUTDIR+".root"
-    if len(all_ready) == len(alldir):
+    if len(all_ready)+1 == len(alldir):
         if os.path.exists(final_hadded_filename):
             if os.path.getsize(final_hadded_filename)<1024:
                 os.remove(final_hadded_filename)
