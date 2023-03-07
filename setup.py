@@ -95,7 +95,7 @@ for flist in vf:
                 fl = open(ANA_BASE+'/filelists/'+year+'/data/'+sample+'.txt', 'a')
                 print>>fl, filename
             # Signals
-            elif re.compile('.*T[1-9][t,b,c,q,W,Z,H][t,b,c,q,W,Z,H].*').match(sample) or "TChi" in sample or "RPV" in sample:
+            elif re.compile('.*T[1-9][t,b,c,q,W,Z,H][t,b,c,q,W,Z,H].*').match(sample) or "TChi" in sample or "SMS-" in sample:
                 fl = open(ANA_BASE+'/filelists/'+year+'/signals/'+sample+'.txt', 'a')
                 print>>fl, filename
             # Backgrounds
