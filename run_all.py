@@ -240,8 +240,8 @@ def get_optim_ratios(opt, samplename):
                 # If no optimization found (happens rarely for new samples), use 0.2 (to be safe for all samples)
                 # Make sure to remake the job_ratios.txt file after the run!
                 if not optim_found:
-                    print "No optimization found for "+samplename+" using 2.0"
-                    optim = 2.0
+                    print "No optimization found for "+samplename+" using 1.0"
+                    optim = 1.0
         optim_ratios[samplename] = optim
         return optim
 
